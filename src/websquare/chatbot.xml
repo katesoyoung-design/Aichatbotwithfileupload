@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:w2="http://www.inswave.com/websquare"
+    xmlns:xf="http://www.w3.org/2002/xforms">
+    <head>
+        <w2:type>COMPONENT</w2:type>
+        <w2:buildDate />
+        <w2:MSA />
+        <xf:model>
+            <xf:instance>
+                <data xmlns="">
+                    <currentTheme>blue-purple</currentTheme>
+                    <activeTab>helper</activeTab>
+                    <layout>floating</layout>
+                    <alertsExpanded>true</alertsExpanded>
+                    <showAlert>false</showAlert>
+                    <showThemeMenu>false</showThemeMenu>
+                    <uploadedFileName></uploadedFileName>
+                    <inputValue></inputValue>
+                </data>
+            </xf:instance>
+        </xf:model>
+        <w2:layoutInfo />
+        <w2:publicInfo />
+        
+        <script type="text/javascript" src="/websquare/js/chatbot-core.js"></script>
+        <script type="text/javascript" src="/websquare/js/chatbot-svg.js"></script>
+        <link rel="stylesheet" type="text/css" href="/websquare/css/chatbot-core.css" />
+        
+        <script type="text/javascript"><![CDATA[
+            scwin.onpageload = function() {
+                ChatbotCore.init();
+            };
+        ]]></script>
+    </head>
+    <body>
+        <w2:group id="grp_chatbot_container" style="width:100%;height:100%;">
+            <div id="chatbot_container" class="chatbot-core chatbot-layout-floating chatbot-theme-blue-purple">
+                <!-- Header -->
+                <div class="chatbot-core-header">
+                    <div class="chatbot-core-header-bg-overlay" id="chatbot_header_bg"></div>
+                    <div class="chatbot-core-header-content">
+                        <div class="chatbot-core-header-left">
+                            <div class="chatbot-core-logo" id="chatbot_logo"></div>
+                            <div class="chatbot-core-title">MiraeChatbot</div>
+                        </div>
+                        <div class="chatbot-core-header-buttons">
+                            <!-- Settings Button & Menu -->
+                            <div class="chatbot-settings-wrapper">
+                                <button class="chatbot-core-header-btn" onclick="ChatbotCore.toggleThemeMenu()" title="설정">
+                                    <svg width="20" height="20" viewBox="0 0 14.1246 15.5" fill="none">
+                                        <path d="M5.81229 1.75L6.31229 0.75H7.81229L8.31229 1.75C8.54229 2.2 8.93229 2.55 9.41229 2.7L10.4623 3.05L11.4123 2.6L12.6623 3.85L12.2123 4.8L12.5623 5.85C12.7123 6.33 13.0623 6.72 13.5123 6.95L14.5123 7.45V8.95L13.5123 9.45C13.0623 9.68 12.7123 10.07 12.5623 10.55L12.2123 11.6L12.6623 12.55L11.4123 13.8L10.4623 13.35L9.41229 13.7C8.93229 13.85 8.54229 14.2 8.31229 14.65L7.81229 15.65H6.31229L5.81229 14.65C5.58229 14.2 5.19229 13.85 4.71229 13.7L3.66229 13.35L2.71229 13.8L1.46229 12.55L1.91229 11.6L1.56229 10.55C1.41229 10.07 1.06229 9.68 0.612293 9.45L-0.387707 8.95V7.45L0.612293 6.95C1.06229 6.72 1.41229 6.33 1.56229 5.85L1.91229 4.8L1.46229 3.85L2.71229 2.6L3.66229 3.05L4.71229 2.7C5.19229 2.55 5.58229 2.2 5.81229 1.75Z" stroke="white" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" />
+                                        <path d="M7.06229 10.2C8.28889 10.2 9.28229 9.2066 9.28229 7.98C9.28229 6.7534 8.28889 5.76 7.06229 5.76C5.83569 5.76 4.84229 6.7534 4.84229 7.98C4.84229 9.2066 5.83569 10.2 7.06229 10.2Z" stroke="white" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" />
+                                    </svg>
+                                </button>
+                                
+                                <!-- Theme Menu -->
+                                <div id="chatbot_theme_menu" class="chatbot-theme-menu" style="display:none;">
+                                    <div class="chatbot-theme-menu-header">
+                                        <span>배경 선택</span>
+                                    </div>
+                                    <div class="chatbot-theme-menu-items">
+                                        <button id="chatbot_theme_blue_purple" class="chatbot-theme-item active" onclick="ChatbotCore.handleThemeChange('blue-purple')">
+                                            <span>블루퍼플</span>
+                                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="display:inline;">
+                                                <path d="M13.3334 4L6.00002 11.3333L2.66669 8" stroke="#5B5FC7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                            </svg>
+                                        </button>
+                                        <button id="chatbot_theme_mirae_ai" class="chatbot-theme-item" onclick="ChatbotCore.handleThemeChange('mirae-ai')">
+                                            <span>미래에셋 AI</span>
+                                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="display:none;">
+                                                <path d="M13.3334 4L6.00002 11.3333L2.66669 8" stroke="#5B5FC7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                            </svg>
+                                        </button>
+                                        <button id="chatbot_theme_night_universe" class="chatbot-theme-item" onclick="ChatbotCore.handleThemeChange('night-universe')">
+                                            <span>밤우주</span>
+                                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="display:none;">
+                                                <path d="M13.3334 4L6.00002 11.3333L2.66669 8" stroke="#5B5FC7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Header Buttons -->
+                            <button class="chatbot-core-header-btn" onclick="ChatbotCore.onMaximize()" title="최대화">
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                    <path d="M2.5 7.5V2.5H7.5M17.5 7.5V2.5H12.5M2.5 12.5V17.5H7.5M17.5 12.5V17.5H12.5" stroke="white" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" />
+                                </svg>
+                            </button>
+                            <button class="chatbot-core-header-btn" onclick="ChatbotCore.onMinimize()" title="최소화">
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                    <path d="M2.5 7.5V2.5H7.5M17.5 7.5V2.5H12.5M2.5 12.5V17.5H7.5M17.5 12.5V17.5H12.5" stroke="white" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" />
+                                </svg>
+                            </button>
+                            <button class="chatbot-core-header-btn" onclick="ChatbotCore.onClose()" title="닫기">
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                    <path d="M15 5L5 15" stroke="white" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" />
+                                    <path d="M5 5L15 15" stroke="white" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tabs -->
+                <div class="chatbot-core-tabs">
+                    <div id="chatbot_tab_helper" class="chatbot-core-tab active" onclick="ChatbotCore.setActiveTab('helper')">
+                        <span>화면도우미</span>
+                        <div class="chatbot-core-tab-indicator"></div>
+                    </div>
+                    <div id="chatbot_tab_todo" class="chatbot-core-tab" onclick="ChatbotCore.setActiveTab('todo')">
+                        <span>설계사 할일</span>
+                        <div class="chatbot-core-tab-indicator"></div>
+                    </div>
+                </div>
+                
+                <!-- Alerts Area -->
+                <div id="chatbot_alerts_area"></div>
+                
+                <!-- Messages Area -->
+                <div id="chatbot_messages" class="chatbot-core-messages"></div>
+                
+                <!-- Input Section -->
+                <div class="chatbot-core-input" id="chatbot_input_section">
+                    <input 
+                        id="chatbot_file_input" 
+                        type="file" 
+                        accept="image/*,.pdf,.doc,.docx" 
+                        class="chatbot-core-file-input-hidden"
+                        onchange="ChatbotCore.handleFileUpload()"
+                    />
+                    <button class="chatbot-core-attach-btn" id="chatbot_attach_btn" onclick="ChatbotCore.openFileDialog()"></button>
+                    <div class="chatbot-core-input-wrapper">
+                        <input 
+                            id="chatbot_input" 
+                            type="text" 
+                            placeholder="메시지를 입력하세요..." 
+                            onkeydown="ChatbotCore.handleKeyPress(event)"
+                            onkeyup="ChatbotCore.updateInputValue()"
+                        />
+                        <button class="chatbot-core-send-btn" id="chatbot_send_btn" onclick="ChatbotCore.handleSendMessage()"></button>
+                    </div>
+                    <button class="chatbot-core-send-btn-night" id="chatbot_send_btn_night" onclick="ChatbotCore.handleSendMessage()" style="display:none;"></button>
+                </div>
+            </div>
+        </w2:group>
+    </body>
+</html>
