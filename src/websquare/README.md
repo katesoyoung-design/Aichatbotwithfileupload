@@ -5,13 +5,40 @@
 ```
 /websquare/
   ├── chatbot.xml                # WebSquare UI 정의 파일
+  ├── chatbot-inline.html        # div 직접 포함 예제
+  ├── chatbot-with-form.xml      # WebSquare 폼 연동 예제
+  ├── form-example.html          # 폼 연동 테스트 예제
+  ├── universal-example.html     # 범용 위젯 예제 ⭐
   ├── css/
   │   └── chatbot-core.css       # 챗봇 스타일시트
   ├── js/
+  │   ├── chatbot-widget.js      # 범용 위젯 (한 줄 로드) ⭐ 신규
   │   ├── chatbot-core.js        # 챗봇 핵심 로직
   │   └── chatbot-svg.js         # SVG 아이콘 모듈
-  └── README.md                  # 이 파일
+  ├── README.md                  # 이 파일
+  ├── UNIVERSAL-GUIDE.md         # 범용 위젯 가이드 ⭐ 신규
+  └── TROUBLESHOOTING.md         # 문제 해결 가이드
 ```
+
+## ⚡ 가장 빠른 시작 (권장)
+
+### 어느 페이지에서든 한 줄로 로드! ⭐ 신규
+
+```html
+<!-- HTML 또는 WebSquare XML에 이 한 줄만 추가 -->
+<script src="/websquare/js/chatbot-widget.js"></script>
+```
+
+**끝!** 🎉
+- ✅ 자동으로 챗봇 로드
+- ✅ 우측 하단에 플로팅 버튼(💬) 표시
+- ✅ 클릭하면 챗봇 열림
+- ✅ 폼 자동 입력 기능 활성화
+- ✅ 모든 페이지에서 재사용 가능
+
+**상세 가이드:** [UNIVERSAL-GUIDE.md](UNIVERSAL-GUIDE.md) 참고
+
+---
 
 ## 🚀 빠른 시작
 
@@ -28,7 +55,47 @@ WebSquare 프로젝트에 다음 파일들을 복사합니다:
 
 ### 2. 메인 페이지에 챗봇 포함
 
-#### 방법 A: iframe 방식 (권장)
+#### 방법 A: div 직접 포함 (권장 ✨ 신규)
+```html
+<!-- HTML head에 추가 -->
+<link rel="stylesheet" href="/websquare/css/chatbot-core.css">
+<script src="/websquare/js/chatbot-svg.js"></script>
+<script src="/websquare/js/chatbot-core.js"></script>
+
+<!-- body에 챗봇 div 추가 -->
+<div id="chatbot_container" class="chatbot-core chatbot-layout-floating chatbot-theme-blue-purple">
+    <!-- chatbot.xml의 body 내용 복사 -->
+</div>
+
+<!-- 초기화 스크립트 -->
+<script>
+window.addEventListener('DOMContentLoaded', function() {
+    ChatbotCore.init();
+});
+
+// 폼 데이터 수신
+document.addEventListener('chatbotFormData', function(e) {
+    var data = e.detail;
+    if (data.type === 'phone') {
+        document.getElementById('phone1').value = data.parts[0];
+        document.getElementById('phone2').value = data.parts[1];
+        document.getElementById('phone3').value = data.parts[2];
+    }
+});
+</script>
+```
+
+**장점:**
+- ✅ iframe 통신 문제 없음
+- ✅ 같은 페이지의 input에 바로 접근 가능
+- ✅ postMessage 불필요
+- ✅ 디버깅 쉬움
+
+**완전한 예제:**
+- `/websquare/chatbot-inline.html` - HTML 예제
+- `/websquare/chatbot-with-form.xml` - WebSquare XML 예제
+
+#### 방법 B: iframe 방식
 ```xml
 <!-- 메인 페이지 하단에 추가 -->
 <w2:group id="grp_chatbot_wrapper" style="position:fixed;bottom:20px;right:20px;z-index:9999;width:375px;height:600px;">
@@ -36,7 +103,7 @@ WebSquare 프로젝트에 다음 파일들을 복사합니다:
 </w2:group>
 ```
 
-#### 방법 B: include 방식
+#### 방법 C: include 방식
 ```xml
 <!-- 메인 페이지에 추가 -->
 <w2:include id="include_chatbot" src="/ui/chatbot/chatbot.xml"></w2:include>
@@ -129,7 +196,71 @@ scwin.onChatbotMessage = function(message) {
 };
 ```
 
-### 2. 파일 업로드 수신
+### 2. 폼 자동 입력 (신규 ✨)
+
+채팅창에 입력한 정보가 자동으로 폼에 입력됩니다:
+
+```javascript
+// 부모 페이지
+scwin.onChatbotFormData = function(data) {
+    console.log('폼 데이터 수신:', data);
+    
+    switch(data.type) {
+        case 'name':
+            // 이름 입력: 채팅창에 "홍길동" 입력
+            $p.getComponentById('name').setValue(data.value);
+            break;
+            
+        case 'phone':
+            // 전화번호 입력: "010-1234-5678" 또는 "010 1234 5678" 입력
+            $p.getComponentById('phone1').setValue(data.parts[0]);
+            $p.getComponentById('phone2').setValue(data.parts[1]);
+            $p.getComponentById('phone3').setValue(data.parts[2]);
+            break;
+            
+        case 'email':
+            // 이메일 입력: "example@domain.com" 입력
+            $p.getComponentById('email_local').setValue(data.localPart);
+            $p.getComponentById('email_domain').setValue(data.domain);
+            break;
+            
+        case 'address':
+            // 주소 입력: "서울특별시 영등포구 국제금융로 79" 입력
+            $p.getComponentById('address').setValue(data.value);
+            break;
+    }
+};
+```
+
+**지원되는 입력 형식:**
+- **이름**: 한글 2-4자 (예: `홍길동`, `김철수`)
+- **전화번호**: `010-1234-5678`, `010 1234 5678`, `01012345678`
+- **이메일**: `example@domain.com`
+- **주소**: 시/도로 시작하는 주소 (예: `서울특별시 영등포구 국제금융로 79`)
+
+**복합 입력 가능:**
+```
+채팅창 입력: "홍길동 010-1234-5678 example@domain.com"
+→ 이름, 전화번호, 이메일이 동시에 폼에 입력됨
+```
+
+### 3. CustomEvent 리스너 (대안 방법)
+
+```javascript
+// 부모 페이지 또는 HTML
+document.addEventListener('chatbotFormData', function(e) {
+    var data = e.detail;
+    
+    // HTML input 직접 접근
+    if (data.type === 'phone') {
+        document.getElementById('phone1').value = data.parts[0];
+        document.getElementById('phone2').value = data.parts[1];
+        document.getElementById('phone3').value = data.parts[2];
+    }
+});
+```
+
+### 4. 파일 업로드 수신
 
 ```javascript
 // 부모 페이지
@@ -148,7 +279,7 @@ scwin.onChatbotFileUpload = function(file) {
 };
 ```
 
-### 3. 테마 변경 감지
+### 5. 테마 변경 감지
 
 ```javascript
 // 부모 페이지
@@ -164,7 +295,7 @@ scwin.onChatbotThemeChange = function(theme) {
 };
 ```
 
-### 4. 챗봇 상태 변경 감지
+### 6. 챗봇 상태 변경 감지
 
 ```javascript
 // 부모 페이지

@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSquare 챗봇 (div 직접 포함 방식)</title>
+    
+    <!-- 챗봇 CSS -->
+    <link rel="stylesheet" href="css/chatbot-core.css">
+    
+    <!-- 폼 스타일 -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans', 'Noto Sans KR', sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 840px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 100px;
+        }
+        
+        h1 {
+            font-size: 24px;
+            margin-bottom: 32px;
+            color: #101828;
+            border-bottom: 2px solid #1c309a;
+            padding-bottom: 12px;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .form-field {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .form-field.full {
+            grid-column: span 2;
+        }
+        
+        label {
+            font-size: 14px;
+            color: #364153;
+            font-weight: 500;
+        }
+        
+        input[type="text"] {
+            height: 46px;
+            padding: 10px 16px;
+            border: 1px solid #d1d5dc;
+            border-radius: 6px;
+            font-size: 16px;
+            color: #222;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        
+        input:focus {
+            border-color: #5b5fc7;
+        }
+        
+        .phone-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+        }
+        
+        .email-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .email-group input {
+            flex: 1;
+        }
+        
+        .email-separator {
+            color: #666;
+            font-size: 16px;
+        }
+        
+        .submit-btn {
+            padding: 12px 48px;
+            background: #5563ff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 24px;
+        }
+        
+        .submit-btn:hover {
+            background: #4451dd;
+        }
+        
+        .status {
+            margin-top: 16px;
+            padding: 12px;
+            border-radius: 6px;
+            background: #e8f5e9;
+            color: #2e7d32;
+            display: none;
+        }
+        
+        .chatbot-info {
+            background: #e8eaf6;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 32px;
+        }
+        
+        .chatbot-info h2 {
+            font-size: 18px;
+            margin-bottom: 12px;
+            color: #1c309a;
+        }
+        
+        .chatbot-info ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .chatbot-info li {
+            padding: 8px 0;
+            color: #364153;
+        }
+        
+        .chatbot-info code {
+            background: #fff;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            color: #5b5fc7;
+        }
+        
+        /* 챗봇 컨테이너 위치 */
+        #chatbot_container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <!-- 폼 영역 -->
+    <div class="container">
+        <h1>고객 정보 입력 폼</h1>
+        
+        <form id="customerForm">
+            <div class="form-row">
+                <div class="form-field">
+                    <label for="name">이름</label>
+                    <input type="text" id="name" placeholder="홍길동">
+                </div>
+                
+                <div class="form-field">
+                    <label>전화번호</label>
+                    <div class="phone-group">
+                        <input type="text" id="phone1" maxlength="3" placeholder="010">
+                        <input type="text" id="phone2" maxlength="4" placeholder="1234">
+                        <input type="text" id="phone3" maxlength="4" placeholder="5678">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-field full">
+                    <label>이메일</label>
+                    <div class="email-group">
+                        <input type="text" id="email_local" placeholder="example">
+                        <span class="email-separator">@</span>
+                        <input type="text" id="email_domain" placeholder="domain.com">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-field full">
+                    <label for="address">주소</label>
+                    <input type="text" id="address" placeholder="서울특별시 영등포구 국제금융로 79">
+                </div>
+            </div>
+            
+            <button type="submit" class="submit-btn">저장</button>
+            <div id="status" class="status"></div>
+        </form>
+        
+        <div class="chatbot-info">
+            <h2>📌 챗봇 테스트 가이드</h2>
+            <ul>
+                <li>💬 <strong>이름:</strong> <code>홍길동</code></li>
+                <li>📞 <strong>전화번호:</strong> <code>010-1234-5678</code> 또는 <code>010 1234 5678</code></li>
+                <li>📧 <strong>이메일:</strong> <code>example@domain.com</code></li>
+                <li>🏠 <strong>주소:</strong> <code>서울특별시 영등포구 국제금융로 79</code></li>
+                <li>✅ <strong>복합:</strong> <code>홍길동 010-1234-5678 example@domain.com</code></li>
+            </ul>
+        </div>
+    </div>
+    
+    <!-- 챗봇 div (iframe 없이 직접 포함) -->
+    <div id="chatbot_container" class="chatbot-core chatbot-layout-floating chatbot-theme-blue-purple">
+        <!-- Header -->
+        <div class="chatbot-core-header">
+            <div class="chatbot-core-header-bg-overlay" id="chatbot_header_bg"></div>
+            <div class="chatbot-core-header-content">
+                <div class="chatbot-core-header-left">
+                    <div class="chatbot-core-logo" id="chatbot_logo"></div>
+                    <div class="chatbot-core-title">MiraeChatbot</div>
+                </div>
+                <div class="chatbot-core-header-buttons">
+                    <!-- Settings Button & Menu -->
+                    <div class="chatbot-settings-wrapper">
+                        <button class="chatbot-core-header-btn" onclick="ChatbotCore.toggleThemeMenu()" title="설정">
+                            <svg width="20" height="20" viewBox="0 0 14.1246 15.5" fill="none">
+                                <path d="M5.81229 1.75L6.31229 0.75H7.81229L8.31229 1.75C8.54229 2.2 8.93229 2.55 9.41229 2.7L10.4623 3.05L11.4123 2.6L12.6623 3.85L12.2123 4.8L12.5623 5.85C12.7123 6.33 13.0623 6.72 13.5123 6.95L14.5123 7.45V8.95L13.5123 9.45C13.0623 9.68 12.7123 10.07 12.5623 10.55L12.2123 11.6L12.6623 12.55L11.4123 13.8L10.4623 13.35L9.41229 13.7C8.93229 13.85 8.54229 14.2 8.31229 14.65L7.81229 15.65H6.31229L5.81229 14.65C5.58229 14.2 5.19229 13.85 4.71229 13.7L3.66229 13.35L2.71229 13.8L1.46229 12.55L1.91229 11.6L1.56229 10.55C1.41229 10.07 1.06229 9.68 0.612293 9.45L-0.387707 8.95V7.45L0.612293 6.95C1.06229 6.72 1.41229 6.33 1.56229 5.85L1.91229 4.8L1.46229 3.85L2.71229 2.6L3.66229 3.05L4.71229 2.7C5.19229 2.55 5.58229 2.2 5.81229 1.75Z" stroke="white" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" />
+                                <path d="M7.06229 10.2C8.28889 10.2 9.28229 9.2066 9.28229 7.98C9.28229 6.7534 8.28889 5.76 7.06229 5.76C5.83569 5.76 4.84229 6.7534 4.84229 7.98C4.84229 9.2066 5.83569 10.2 7.06229 10.2Z" stroke="white" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" />
+                            </svg>
+                        </button>
+                        
+                        <!-- Theme Menu -->
+                        <div id="chatbot_theme_menu" class="chatbot-theme-menu" style="display:none;">
+                            <div class="chatbot-theme-menu-header">
+                                <span>배경 선택</span>
+                            </div>
+                            <div class="chatbot-theme-menu-items">
+                                <button id="chatbot_theme_blue_purple" class="chatbot-theme-item active" onclick="ChatbotCore.handleThemeChange('blue-purple')">
+                                    <span>블루퍼플</span>
+                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="display:inline;">
+                                        <path d="M13.3334 4L6.00002 11.3333L2.66669 8" stroke="#5B5FC7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </button>
+                                <button id="chatbot_theme_mirae_ai" class="chatbot-theme-item" onclick="ChatbotCore.handleThemeChange('mirae-ai')">
+                                    <span>미래에셋 AI</span>
+                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="display:none;">
+                                        <path d="M13.3334 4L6.00002 11.3333L2.66669 8" stroke="#5B5FC7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </button>
+                                <button id="chatbot_theme_night_universe" class="chatbot-theme-item" onclick="ChatbotCore.handleThemeChange('night-universe')">
+                                    <span>밤우주</span>
+                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="display:none;">
+                                        <path d="M13.3334 4L6.00002 11.3333L2.66669 8" stroke="#5B5FC7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Header Buttons -->
+                    <button class="chatbot-core-header-btn" onclick="ChatbotCore.onMaximize()" title="최대화">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M2.5 7.5V2.5H7.5M17.5 7.5V2.5H12.5M2.5 12.5V17.5H7.5M17.5 12.5V17.5H12.5" stroke="white" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" />
+                        </svg>
+                    </button>
+                    <button class="chatbot-core-header-btn" onclick="ChatbotCore.onMinimize()" title="최소화">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M2.5 7.5V2.5H7.5M17.5 7.5V2.5H12.5M2.5 12.5V17.5H7.5M17.5 12.5V17.5H12.5" stroke="white" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" />
+                        </svg>
+                    </button>
+                    <button class="chatbot-core-header-btn" onclick="ChatbotCore.onClose()" title="닫기">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M15 5L5 15" stroke="white" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" />
+                            <path d="M5 5L15 15" stroke="white" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tabs -->
+        <div class="chatbot-core-tabs">
+            <div id="chatbot_tab_helper" class="chatbot-core-tab active" onclick="ChatbotCore.setActiveTab('helper')">
+                <span>화면도우미</span>
+                <div class="chatbot-core-tab-indicator"></div>
+            </div>
+            <div id="chatbot_tab_todo" class="chatbot-core-tab" onclick="ChatbotCore.setActiveTab('todo')">
+                <span>설계사 할일</span>
+                <div class="chatbot-core-tab-indicator"></div>
+            </div>
+        </div>
+        
+        <!-- Alerts Area -->
+        <div id="chatbot_alerts_area"></div>
+        
+        <!-- Messages Area -->
+        <div id="chatbot_messages" class="chatbot-core-messages"></div>
+        
+        <!-- Input Section -->
+        <div class="chatbot-core-input" id="chatbot_input_section">
+            <input 
+                id="chatbot_file_input" 
+                type="file" 
+                accept="image/*,.pdf,.doc,.docx" 
+                class="chatbot-core-file-input-hidden"
+                onchange="ChatbotCore.handleFileUpload()"
+            />
+            <button class="chatbot-core-attach-btn" id="chatbot_attach_btn" onclick="ChatbotCore.openFileDialog()"></button>
+            <div class="chatbot-core-input-wrapper">
+                <input 
+                    id="chatbot_input" 
+                    type="text" 
+                    placeholder="메시지를 입력하세요..." 
+                    onkeydown="ChatbotCore.handleKeyPress(event)"
+                    onkeyup="ChatbotCore.updateInputValue()"
+                />
+                <button class="chatbot-core-send-btn" id="chatbot_send_btn" onclick="ChatbotCore.handleSendMessage()"></button>
+            </div>
+            <button class="chatbot-core-send-btn-night" id="chatbot_send_btn_night" onclick="ChatbotCore.handleSendMessage()" style="display:none;"></button>
+        </div>
+    </div>
+    
+    <!-- 챗봇 JavaScript -->
+    <script src="js/chatbot-svg.js"></script>
+    <script src="js/chatbot-core.js"></script>
+    
+    <script>
+        // 챗봇 초기화
+        window.addEventListener('DOMContentLoaded', function() {
+            ChatbotCore.init();
+        });
+        
+        // CustomEvent 리스너 (같은 페이지이므로 바로 작동)
+        document.addEventListener('chatbotFormData', function(e) {
+            var data = e.detail;
+            console.log('폼 데이터 수신:', data);
+            
+            var statusEl = document.getElementById('status');
+            var message = '';
+            
+            switch(data.type) {
+                case 'name':
+                    message = '이름: ' + data.value;
+                    break;
+                case 'phone':
+                    message = '전화번호: ' + data.value;
+                    break;
+                case 'email':
+                    message = '이메일: ' + data.value;
+                    break;
+                case 'address':
+                    message = '주소: ' + data.value;
+                    break;
+            }
+            
+            if (message) {
+                statusEl.textContent = '✓ ' + message + ' 입력됨';
+                statusEl.style.display = 'block';
+                setTimeout(function() {
+                    statusEl.style.display = 'none';
+                }, 3000);
+            }
+        });
+        
+        // 폼 제출
+        document.getElementById('customerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            var formData = {
+                name: document.getElementById('name').value,
+                phone: document.getElementById('phone1').value + '-' + 
+                       document.getElementById('phone2').value + '-' + 
+                       document.getElementById('phone3').value,
+                email: document.getElementById('email_local').value + '@' + 
+                       document.getElementById('email_domain').value,
+                address: document.getElementById('address').value
+            };
+            
+            console.log('저장된 폼 데이터:', formData);
+            
+            var statusEl = document.getElementById('status');
+            statusEl.textContent = '✓ 고객 정보가 저장되었습니다!';
+            statusEl.style.display = 'block';
+        });
+    </script>
+</body>
+</html>

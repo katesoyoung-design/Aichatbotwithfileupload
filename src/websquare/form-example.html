@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSquare 챗봇 폼 예제</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans', 'Noto Sans KR', sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 840px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            font-size: 24px;
+            margin-bottom: 32px;
+            color: #101828;
+            border-bottom: 2px solid #1c309a;
+            padding-bottom: 12px;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .form-field {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .form-field.full {
+            grid-column: span 2;
+        }
+        
+        label {
+            font-size: 14px;
+            color: #364153;
+            font-weight: 500;
+        }
+        
+        input[type="text"],
+        input[type="email"] {
+            height: 46px;
+            padding: 10px 16px;
+            border: 1px solid #d1d5dc;
+            border-radius: 6px;
+            font-size: 16px;
+            color: #222;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        
+        input:focus {
+            border-color: #5b5fc7;
+        }
+        
+        .phone-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+        }
+        
+        .email-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .email-group input {
+            flex: 1;
+        }
+        
+        .email-separator {
+            color: #666;
+            font-size: 16px;
+        }
+        
+        .chatbot-info {
+            background: #e8eaf6;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 32px;
+        }
+        
+        .chatbot-info h2 {
+            font-size: 18px;
+            margin-bottom: 12px;
+            color: #1c309a;
+        }
+        
+        .chatbot-info ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .chatbot-info li {
+            padding: 8px 0;
+            color: #364153;
+        }
+        
+        .chatbot-info code {
+            background: #fff;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            color: #5b5fc7;
+        }
+        
+        .submit-btn {
+            padding: 12px 48px;
+            background: #5563ff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 24px;
+        }
+        
+        .submit-btn:hover {
+            background: #4451dd;
+        }
+        
+        .status {
+            margin-top: 16px;
+            padding: 12px;
+            border-radius: 6px;
+            background: #e8f5e9;
+            color: #2e7d32;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>고객 정보 입력 폼</h1>
+        
+        <form id="customerForm">
+            <div class="form-row">
+                <div class="form-field">
+                    <label for="name">이름</label>
+                    <input type="text" id="name" placeholder="홍길동">
+                </div>
+                
+                <div class="form-field">
+                    <label>전화번호</label>
+                    <div class="phone-group">
+                        <input type="text" id="phone1" maxlength="3" placeholder="010">
+                        <input type="text" id="phone2" maxlength="4" placeholder="1234">
+                        <input type="text" id="phone3" maxlength="4" placeholder="5678">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-field full">
+                    <label>이메일</label>
+                    <div class="email-group">
+                        <input type="text" id="email_local" placeholder="example">
+                        <span class="email-separator">@</span>
+                        <input type="text" id="email_domain" placeholder="domain.com">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-field full">
+                    <label for="address">주소</label>
+                    <input type="text" id="address" placeholder="서울특별시 영등포구 국제금융로 79">
+                </div>
+            </div>
+            
+            <button type="submit" class="submit-btn">저장</button>
+            <div id="status" class="status"></div>
+        </form>
+        
+        <div class="chatbot-info">
+            <h2>📌 챗봇 테스트 가이드</h2>
+            <ul>
+                <li>💬 <strong>이름 입력:</strong> 채팅창에 <code>홍길동</code> 입력</li>
+                <li>📞 <strong>전화번호 입력:</strong> <code>010-1234-5678</code> 또는 <code>010 1234 5678</code> 입력</li>
+                <li>📧 <strong>이메일 입력:</strong> <code>example@domain.com</code> 입력</li>
+                <li>🏠 <strong>주소 입력:</strong> <code>서울특별시 영등포구 국제금융로 79</code> 입력</li>
+                <li>✅ <strong>복합 입력:</strong> <code>홍길동 010-1234-5678 example@domain.com</code> 한 번에 입력 가능</li>
+            </ul>
+        </div>
+    </div>
+    
+    <!-- 챗봇 iframe -->
+    <iframe id="chatbot_iframe" src="chatbot.xml" style="position:fixed;bottom:20px;right:20px;width:375px;height:600px;border:none;border-radius:12px;box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);z-index:1000;"></iframe>
+    
+    <script>
+        // postMessage 수신 (iframe에서 전송)
+        window.addEventListener('message', function(event) {
+            if (event.data && event.data.type === 'chatbotFormData') {
+                var data = event.data.data;
+                console.log('챗봇으로부터 데이터 수신 (postMessage):', data);
+                handleFormData(data);
+            }
+        });
+        
+        // CustomEvent 리스너 등록
+        document.addEventListener('chatbotFormData', function(e) {
+            var data = e.detail;
+            console.log('챗봇으로부터 데이터 수신 (CustomEvent):', data);
+            handleFormData(data);
+        });
+        
+        // 폼 데이터 처리
+        function handleFormData(data) {
+            var statusEl = document.getElementById('status');
+            var message = '';
+            
+            switch(data.type) {
+                case 'name':
+                    document.getElementById('name').value = data.value;
+                    message = '이름이 입력되었습니다: ' + data.value;
+                    break;
+                    
+                case 'phone':
+                    document.getElementById('phone1').value = data.parts[0];
+                    document.getElementById('phone2').value = data.parts[1];
+                    document.getElementById('phone3').value = data.parts[2];
+                    message = '전화번호가 입력되었습니다: ' + data.value;
+                    break;
+                    
+                case 'email':
+                    document.getElementById('email_local').value = data.localPart;
+                    document.getElementById('email_domain').value = data.domain;
+                    message = '이메일이 입력되었습니다: ' + data.value;
+                    break;
+                    
+                case 'address':
+                    document.getElementById('address').value = data.value;
+                    message = '주소가 입력되었습니다: ' + data.value;
+                    break;
+            }
+            
+            if (message) {
+                statusEl.textContent = '✓ ' + message;
+                statusEl.style.display = 'block';
+                setTimeout(function() {
+                    statusEl.style.display = 'none';
+                }, 3000);
+            }
+        }
+        
+        // 폼 제출 처리
+        document.getElementById('customerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            var formData = {
+                name: document.getElementById('name').value,
+                phone: document.getElementById('phone1').value + '-' + 
+                       document.getElementById('phone2').value + '-' + 
+                       document.getElementById('phone3').value,
+                email: document.getElementById('email_local').value + '@' + 
+                       document.getElementById('email_domain').value,
+                address: document.getElementById('address').value
+            };
+            
+            console.log('저장된 폼 데이터:', formData);
+            
+            var statusEl = document.getElementById('status');
+            statusEl.textContent = '✓ 고객 정보가 저장되었습니다!';
+            statusEl.style.display = 'block';
+        });
+    </script>
+</body>
+</html>

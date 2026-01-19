@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>어느 페이지에서든 챗봇 불러오기 예제</title>
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            color: #1c309a;
+            margin-bottom: 24px;
+        }
+        
+        .section {
+            margin-bottom: 32px;
+            padding: 24px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        h2 {
+            color: #364153;
+            font-size: 20px;
+            margin-bottom: 16px;
+        }
+        
+        pre {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 16px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 14px;
+        }
+        
+        code {
+            font-family: 'Courier New', monospace;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #4caf50;
+            color: white;
+            border-radius: 12px;
+            font-size: 12px;
+            margin-left: 8px;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+        
+        button {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        .status {
+            margin-top: 16px;
+            padding: 12px;
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            border-radius: 4px;
+            display: none;
+        }
+        
+        ul {
+            padding-left: 20px;
+        }
+        
+        li {
+            margin-bottom: 8px;
+            color: #364153;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 어느 페이지에서든 챗봇 불러오기</h1>
+        
+        <!-- 방법 1: 자동 초기화 -->
+        <div class="section">
+            <h2>방법 1: 한 줄로 자동 로드 <span class="badge">권장</span></h2>
+            <pre><code>&lt;!-- HTML head 또는 body 끝에 추가 --&gt;
+&lt;script src="/websquare/js/chatbot-widget.js"&gt;&lt;/script&gt;</code></pre>
+            <p>✅ 자동으로 챗봇이 우측 하단에 나타남</p>
+            <p>✅ 플로팅 버튼(💬) 자동 생성</p>
+        </div>
+        
+        <!-- 방법 2: 옵션 설정 -->
+        <div class="section">
+            <h2>방법 2: 옵션과 함께 로드</h2>
+            <pre><code>&lt;script 
+    src="/websquare/js/chatbot-widget.js"
+    data-theme="night-universe"
+    data-position="bottom-left"
+    data-show-button="true"
+&gt;&lt;/script&gt;</code></pre>
+            <p><strong>사용 가능한 옵션:</strong></p>
+            <ul>
+                <li><code>data-theme</code>: blue-purple, mirae-ai, night-universe</li>
+                <li><code>data-position</code>: bottom-right, bottom-left, top-right, top-left</li>
+                <li><code>data-show-button</code>: true, false</li>
+                <li><code>data-auto-init</code>: true, false</li>
+            </ul>
+        </div>
+        
+        <!-- 방법 3: JavaScript로 제어 -->
+        <div class="section">
+            <h2>방법 3: JavaScript로 제어</h2>
+            <pre><code>&lt;script src="/websquare/js/chatbot-widget.js" data-auto-init="false"&gt;&lt;/script&gt;
+
+&lt;script&gt;
+// 수동 초기화
+ChatbotWidget.init({
+    theme: 'blue-purple',
+    position: 'bottom-right',
+    showButton: true
+});
+
+// 챗봇 열기/닫기
+ChatbotWidget.show();
+ChatbotWidget.hide();
+ChatbotWidget.toggle();
+
+// 테마 변경
+ChatbotWidget.setTheme('night-universe');
+&lt;/script&gt;</code></pre>
+            
+            <div class="controls">
+                <button class="btn-primary" onclick="ChatbotWidget.show()">챗봇 열기</button>
+                <button class="btn-secondary" onclick="ChatbotWidget.hide()">챗봇 닫기</button>
+                <button class="btn-primary" onclick="ChatbotWidget.toggle()">챗봇 토글</button>
+            </div>
+            
+            <div class="controls">
+                <button class="btn-secondary" onclick="ChatbotWidget.setTheme('blue-purple')">블루퍼플</button>
+                <button class="btn-secondary" onclick="ChatbotWidget.setTheme('mirae-ai')">미래에셋</button>
+                <button class="btn-secondary" onclick="ChatbotWidget.setTheme('night-universe')">밤우주</button>
+            </div>
+            
+            <div id="status" class="status">✓ 작업 완료</div>
+        </div>
+        
+        <!-- WebSquare 사용법 -->
+        <div class="section">
+            <h2>WebSquare에서 사용하기</h2>
+            <pre><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;html xmlns:w2="http://www.inswave.com/websquare"&gt;
+&lt;head&gt;
+    &lt;w2:type&gt;COMPONENT&lt;/w2:type&gt;
+    
+    &lt;!-- 챗봇 위젯 로드 --&gt;
+    &lt;script src="/websquare/js/chatbot-widget.js"&gt;&lt;/script&gt;
+    
+    &lt;script&gt;&lt;![CDATA[
+        scwin.onpageload = function() {
+            // 챗봇이 자동으로 로드됨
+            
+            // 폼 데이터 이벤트 리스너
+            document.addEventListener('chatbotFormData', function(e) {
+                var data = e.detail;
+                
+                if (data.type === 'phone') {
+                    $p.getComponentById('phone1').setValue(data.parts[0]);
+                    $p.getComponentById('phone2').setValue(data.parts[1]);
+                    $p.getComponentById('phone3').setValue(data.parts[2]);
+                }
+            });
+        };
+        
+        // 버튼으로 챗봇 열기
+        scwin.btn_openchat_onclick = function() {
+            ChatbotWidget.show();
+        };
+    ]]&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;!-- 페이지 내용 --&gt;
+    &lt;xf:trigger id="btn_openchat"&gt;
+        &lt;xf:label&gt;챗봇 열기&lt;/xf:label&gt;
+    &lt;/xf:trigger&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+        </div>
+        
+        <!-- 주의사항 -->
+        <div class="section">
+            <h2>⚠️ 주의사항</h2>
+            <ul>
+                <li>파일 경로: <code>/websquare/js/chatbot-widget.js</code> 확인</li>
+                <li>CSS, SVG, Core JS는 자동으로 로드됨</li>
+                <li>한 페이지에 한 번만 로드해야 함</li>
+                <li>이미 초기화된 경우 재초기화 불가</li>
+            </ul>
+        </div>
+        
+        <!-- 이벤트 리스너 -->
+        <div class="section">
+            <h2>📡 이벤트 리스너</h2>
+            <pre><code>// 챗봇 초기화 완료 이벤트
+document.addEventListener('chatbotReady', function(e) {
+    console.log('챗봇 준비 완료!', e.detail.widget);
+});
+
+// 폼 데이터 수신
+document.addEventListener('chatbotFormData', function(e) {
+    var data = e.detail;
+    console.log('수신된 데이터:', data);
+    
+    // 자동으로 폼에 입력
+    if (data.type === 'name') {
+        document.getElementById('name').value = data.value;
+    }
+});</code></pre>
+        </div>
+    </div>
+    
+    <!-- ✨ 한 줄로 챗봇 로드! -->
+    <script src="js/chatbot-widget.js"></script>
+    
+    <script>
+        // 챗봇 준비 완료 이벤트
+        document.addEventListener('chatbotReady', function() {
+            console.log('✅ 챗봇이 준비되었습니다!');
+            
+            var status = document.getElementById('status');
+            status.textContent = '✓ 챗봇 로드 완료! 우측 하단 버튼을 클릭하세요.';
+            status.style.display = 'block';
+        });
+        
+        // 폼 데이터 이벤트
+        document.addEventListener('chatbotFormData', function(e) {
+            console.log('📩 폼 데이터 수신:', e.detail);
+        });
+    </script>
+</body>
+</html>

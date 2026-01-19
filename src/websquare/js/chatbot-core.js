@@ -61,6 +61,9 @@ var ChatbotCore = (function() {
         
         _messages.push(userMessage);
         
+        // 입력값에서 정보 추출 및 폼에 자동 입력
+        extractAndFillForm(_inputValue);
+        
         // 입력창 초기화
         input.value = '';
         _inputValue = '';
@@ -86,6 +89,145 @@ var ChatbotCore = (function() {
             _messages.push(botMessage);
             renderMessages();
         }, 1000);
+    }
+    
+    /**
+     * 정보 추출 및 폼 자동 입력
+     */
+    function extractAndFillForm(text) {
+        // 전화번호 추출 (010-1234-5678, 010 1234 5678, 01012345678)
+        var phonePattern = /(\d{3})[-\s]?(\d{4})[-\s]?(\d{4})/;
+        var phoneMatch = text.match(phonePattern);
+        if (phoneMatch) {
+            fillPhoneInputs(phoneMatch[1], phoneMatch[2], phoneMatch[3]);
+        }
+        
+        // 이메일 추출
+        var emailPattern = /([a-zA-Z0-9._-]+)@([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/;
+        var emailMatch = text.match(emailPattern);
+        if (emailMatch) {
+            fillEmailInputs(emailMatch[1], emailMatch[2]);
+        }
+        
+        // 이름 추출 (한글 2-4자)
+        var namePattern = /[가-힣]{2,4}/;
+        var words = text.trim().split(/\s+/);
+        for (var i = 0; i < words.length; i++) {
+            if (namePattern.test(words[i])) {
+                fillNameInput(words[i]);
+                break;
+            }
+        }
+        
+        // 주소 추출 (시/도로 시작하는 주소)
+        var addressPattern = /(서울|부산|대구|인천|광주|대전|울산|세종|경기|강원|충북|충남|전북|전남|경북|경남|제주)[^\n]+/;
+        var addressMatch = text.match(addressPattern);
+        if (addressMatch) {
+            fillAddressInput(addressMatch[0]);
+        }
+    }
+    
+    /**
+     * 전화번호 입력 (3칸)
+     */
+    function fillPhoneInputs(part1, part2, part3) {
+        console.log('전화번호 추출:', part1, part2, part3);
+        
+        // 같은 페이지에서 시도
+        var phone1 = document.getElementById('phone1');
+        var phone2 = document.getElementById('phone2');
+        var phone3 = document.getElementById('phone3');
+        
+        if (phone1) phone1.value = part1;
+        if (phone2) phone2.value = part2;
+        if (phone3) phone3.value = part3;
+        
+        // 데이터 전송
+        dispatchFormData({type: 'phone', value: part1 + '-' + part2 + '-' + part3, parts: [part1, part2, part3]});
+    }
+    
+    /**
+     * 이메일 입력
+     */
+    function fillEmailInputs(localPart, domain) {
+        console.log('이메일 추출:', localPart, domain);
+        
+        var emailLocal = document.getElementById('email_local');
+        var emailDomain = document.getElementById('email_domain');
+        
+        if (emailLocal) emailLocal.value = localPart;
+        if (emailDomain) emailDomain.value = domain;
+        
+        // 데이터 전송
+        dispatchFormData({type: 'email', value: localPart + '@' + domain, localPart: localPart, domain: domain});
+    }
+    
+    /**
+     * 이름 입력
+     */
+    function fillNameInput(name) {
+        console.log('이름 추출:', name);
+        
+        var nameInput = document.getElementById('name');
+        
+        if (nameInput) nameInput.value = name;
+        
+        // 데이터 전송
+        dispatchFormData({type: 'name', value: name});
+    }
+    
+    /**
+     * 주소 입력
+     */
+    function fillAddressInput(address) {
+        console.log('주소 추출:', address);
+        
+        var addressInput = document.getElementById('address');
+        
+        if (addressInput) addressInput.value = address;
+        
+        // 데이터 전송
+        dispatchFormData({type: 'address', value: address});
+    }
+    
+    /**
+     * 폼 데이터 전달 (postMessage + CustomEvent)
+     */
+    function dispatchFormData(data) {
+        console.log('폼 데이터 전송:', data);
+        
+        // 1. postMessage로 부모 창에 전달 (iframe 환경)
+        if (window.parent && window.parent !== window) {
+            try {
+                window.parent.postMessage({
+                    type: 'chatbotFormData',
+                    data: data
+                }, '*');
+            } catch (e) {
+                console.error('postMessage 전송 실패:', e);
+            }
+        }
+        
+        // 2. CustomEvent 전달 (같은 페이지)
+        try {
+            var event = new CustomEvent('chatbotFormData', {
+                detail: data,
+                bubbles: true,
+                cancelable: true
+            });
+            document.dispatchEvent(event);
+        } catch (e) {
+            console.error('CustomEvent 전송 실패:', e);
+        }
+        
+        // 3. WebSquare 콜백
+        if (window.parent && window.parent.scwin && window.parent.scwin.onChatbotFormData) {
+            try {
+                window.parent.scwin.onChatbotFormData(data);
+            } catch (e) {
+                console.error('WebSquare 콜백 실패:', e);
+            }
+        }
     }
     
     /**
