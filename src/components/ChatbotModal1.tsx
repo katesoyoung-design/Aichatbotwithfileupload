@@ -18,9 +18,14 @@ export function ChatbotModal1({ onClose, onMaximize }: { onClose: () => void; on
     let initialY = 0;
 
     const handleMouseDown = (e: MouseEvent) => {
-      // Don't drag if clicking on buttons
+      // Don't drag if clicking on buttons, input, or input wrapper
       if ((e.target as HTMLElement).tagName === 'BUTTON') return;
+      if ((e.target as HTMLElement).tagName === 'INPUT') return;
+      if ((e.target as HTMLElement).tagName === 'TEXTAREA') return;
       if ((e.target as HTMLElement).closest('button')) return;
+      if ((e.target as HTMLElement).closest('input')) return;
+      if ((e.target as HTMLElement).closest('.chatbot-core-input-wrapper')) return;
+      if ((e.target as HTMLElement).closest('.chatbot-core-input')) return;
 
       isDragging = true;
       startX = e.clientX;

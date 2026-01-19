@@ -59,34 +59,17 @@ body, html {
   border-radius: 50%;
   cursor: grab;
   position: fixed;
-  box-shadow: 0px 25px 50px -12px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   transition: transform 0.2s ease;
   z-index: 1000;
 }
 
-/* Position buttons horizontally at bottom right */
-.chatbot-btn-1 {
-  bottom: 32px;
-  right: 248px;
-}
+.chatbot-btn-1 { bottom: 32px; right: 248px; }
+.chatbot-btn-2 { bottom: 32px; right: 156px; }
+.chatbot-btn-3 { bottom: 32px; right: 64px; }
 
-.chatbot-btn-2 {
-  bottom: 32px;
-  right: 156px;
-}
-
-.chatbot-btn-3 {
-  bottom: 32px;
-  right: 64px;
-}
-
-.chatbot-trigger-btn:active {
-  cursor: grabbing;
-}
-
-.chatbot-trigger-btn:hover {
-  transform: scale(1.05);
-}
+.chatbot-trigger-btn:active { cursor: grabbing; }
+.chatbot-trigger-btn:hover { transform: scale(1.05); }
 
 .trigger-gradient {
   width: 100%;
@@ -143,6 +126,20 @@ body, html {
   right: 120px;
   z-index: 2500;
   animation: slideUp 0.3s ease;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  border-radius: 20px;
+}
+
+/* Header만 드래그 가능하도록 */
+.chatbot-modal-1 .chatbot-core-header {
+  cursor: move;
+}
+
+/* Input 영역은 일반 커서 */
+.chatbot-modal-1 .chatbot-core-input,
+.chatbot-modal-1 .chatbot-core-input-wrapper,
+.chatbot-modal-1 .chatbot-core-input-wrapper input {
+  cursor: auto;
 }
 
 @keyframes slideUp {

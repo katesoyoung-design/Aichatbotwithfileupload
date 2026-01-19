@@ -1,12 +1,22 @@
-/* ========== MODAL 2 - DIM + FORM + CHAT ========== */
-
-/* Dim Overlay */
+/* ========== MODAL 2 STYLES ========== */
 .modal2-dim-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.53);
   z-index: 2000;
   animation: fadeIn 0.2s ease;
+}
+
+.modal-container-2 {
+  display: flex;
+  width: 1200px;
+  height: 800px;
+  background: white;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  position: relative;
+  z-index: 2500;
 }
 
 /* Main Container */
@@ -98,6 +108,15 @@
   }
   to {
     transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
     opacity: 1;
   }
 }

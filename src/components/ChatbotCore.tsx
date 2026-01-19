@@ -1,7 +1,17 @@
 import { useState, useRef, useEffect, forwardRef } from 'react';
+import Tesseract from 'tesseract.js';
 import svgPaths from "../imports/svg-v9l6pnwa4n";
 import svgPaths2 from "../imports/svg-fv43mlj4l6";
 import svgPathsAttach from "../imports/svg-hbl9rx2zvb";
+import svgPathsNight from "../imports/svg-9sety0i3zq";
+import svgPathsMiraeAlert from "../imports/svg-0kaph5y4uv";
+import svgPathsMiraeBottom from "../imports/svg-wrqeomc2uq";
+import svgPathsSendBlue from "../imports/svg-7pt210oxb1";
+import svgPathsNightAlert from "../imports/svg-9hpw0zgkt6";
+import svgPathsMiraeToggle from "../imports/svg-3thnm4rbqi";
+import svgPathsMiraeAttach from "../imports/svg-te0d3ld3ot";
+import svgPathsNightAttach from "../imports/svg-zma8btynsh";
+import sendBtnNightImage from "figma:asset/e8fde1002f760e5ce76639d1eaca56c93124c8ab.png";
 import headerBgImage from "figma:asset/3ca7ebe3e780a5ce7090ac35f36777c8cfc282fb.png";
 
 interface Message {
@@ -11,6 +21,25 @@ interface Message {
   isFile?: boolean;
   timestamp: Date;
   tab: 'helper' | 'todo';
+  hasButtons?: boolean;
+  extractedData?: {
+    name?: string;
+    idNumber?: string;
+    address?: string;
+    company?: string;
+    position?: string;
+    phone?: string;
+    patient?: string;
+    diagnosis?: string;
+    date?: string;
+    diseases?: string[];
+  };
+}
+
+interface Alert {
+  id: string;
+  message: string;
+  timestamp: Date;
 }
 
 interface ChatbotCoreProps {
@@ -35,6 +64,7 @@ export const ChatbotCore = forwardRef<HTMLDivElement, ChatbotCoreProps>(
   const [alertsExpanded, setAlertsExpanded] = useState(true);
   const [showAlert, setShowAlert] = useState(false);
   const [uploadedFileName, setUploadedFileName] = useState('');
+  const [alerts, setAlerts] = useState<Alert[]>([]);
   const [activeTab, setActiveTab] = useState<'helper' | 'todo'>('helper');
   const [showThemeMenu, setShowThemeMenu] = useState(false);
   const [currentTheme, setCurrentTheme] = useState<'blue-purple' | 'mirae-ai' | 'night-universe'>('blue-purple');
@@ -67,32 +97,100 @@ export const ChatbotCore = forwardRef<HTMLDivElement, ChatbotCoreProps>(
     const event = new CustomEvent('chatbot-message', { detail: inputValue });
     window.dispatchEvent(event);
     
+    const currentInput = inputValue;
     setInputValue('');
 
     setTimeout(() => {
-      const botResponse = getBotResponse(inputValue);
+      const botResponse = getBotResponse(currentInput);
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
         type: 'bot',
-        content: botResponse,
+        content: botResponse.message,
         timestamp: new Date(),
         tab: activeTab,
       };
       setMessages(prev => [...prev, botMessage]);
+      
+      // 정보 입력 감지 시 알림 추가
+      if (botResponse.addAlert) {
+        const newAlert: Alert = {
+          id: Date.now().toString(),
+          message: botResponse.alertMessage || '정보가 입력되었습니다.',
+          timestamp: new Date(),
+        };
+        setAlerts(prev => [...prev, newAlert]);
+        setShowAlert(true);
+        setAlertsExpanded(true);
+      }
     }, 1000);
   };
 
-  const getBotResponse = (userInput: string): string => {
+  const getBotResponse = (userInput: string): { message: string; addAlert: boolean; alertMessage?: string } => {
     const input = userInput.toLowerCase();
     
+    // "네", "아니요" 등의 응답 감지
+    if (input === '네' || input === '네!' || input === 'yes' || input === '예' || input === '예!' ||
+        input === '아니요' || input === '아니오' || input === 'no' || input === '아뇨' || input === '아니') {
+      return { message: '네, 알겠습니다. 추가로 필요하신 사항이 있으면 말씀해주세요.', addAlert: false };
+    }
+    
+    // 직업 입력 감지
+    if (input.includes('직업') || input.includes('회사원') || input.includes('공무원') || 
+        input.includes('자영업') || input.includes('프리랜서') || input.includes('학생') ||
+        input.includes('의사') || input.includes('간호사') || input.includes('교사') || input.includes('엔지니어')) {
+      return {
+        message: '직업 정보가 좌측 입력폼에 반영되었습니다. 추가로 입력하실 정보가 있으신가요?',
+        addAlert: true,
+        alertMessage: `'직업 정보'가 입력되었습니다.`
+      };
+    }
+    
+    // 병력 입력 감지
+    if (input.includes('병력') || input.includes('질병') || input.includes('수술') || 
+        input.includes('고혈압') || input.includes('당뇨') || input.includes('암') ||
+        input.includes('알레르기') || input.includes('지병') || input.includes('건강')) {
+      return {
+        message: '병력 정보가 좌측 입력폼에 반영되었습니다. 추가로 입력하실 정보가 있으신가요?',
+        addAlert: true,
+        alertMessage: `'병력 정보'가 입력되었습니다.`
+      };
+    }
+    
+    // 주소 입력 감지
+    if (input.includes('주소') || input.includes('서울') || input.includes('부산') || 
+        input.includes('대구') || input.includes('인천') || input.includes('광주') ||
+        input.includes('대전') || input.includes('울산') || input.includes('세종') ||
+        input.includes('경기') || input.includes('강원') || input.includes('충청') ||
+        input.includes('전라') || input.includes('경상') || input.includes('제주') ||
+        input.includes('구') || input.includes('동') || input.includes('로') || 
+        (input.includes('번지') || input.includes('아파트') || input.includes('빌딩'))) {
+      return {
+        message: '주소 정보가 좌측 입력폼에 반영되었습니다. 추가로 입력하실 정보가 있으신가요?',
+        addAlert: true,
+        alertMessage: `'주소 정보'가 입력되었습니다.`
+      };
+    }
+    
+    // 전화번호 입력 감지
+    if (input.match(/\d{2,4}[-\s]?\d{3,4}[-\s]?\d{4}/) || 
+        input.includes('전화') || input.includes('연락처') || input.includes('핸드폰') ||
+        input.includes('휴대폰') || input.includes('010') || input.includes('011')) {
+      return {
+        message: '전화번호 정보가 좌측 입력폼에 반영되었습니다. 추가로 입력하실 정보가 있으신가요?',
+        addAlert: true,
+        alertMessage: `'전화번호'가 입력되었습니다.`
+      };
+    }
+    
+    // 기본 응답
     if (input.includes('안녕') || input.includes('hello')) {
-      return '안녕하세요! 무엇을 도와드릴까요?';
+      return { message: '안녕하세요! 무엇을 도와드릴까요?', addAlert: false };
     } else if (input.includes('수정') || input.includes('변경')) {
-      return '좌측 폼에서 수정하실 항목을 직접 변경해주세요.';
+      return { message: '좌측 폼에서 수정하실 항목을 직접 변경해주세요.', addAlert: false };
     } else if (input.includes('저장') || input.includes('완료')) {
-      return '저장 버튼을 눌러 고객 정보를 등록해주세요.';
+      return { message: '저장 버튼을 눌러 고객 정보를 등록해주세요.', addAlert: false };
     } else {
-      return '네, 알겠습니다. 추가로 필요하신 사항이 있으시면 말씀해주세요.';
+      return { message: '네, 알겠습니다. 추가로 필요하신 사항이 있으시면 말씀해주세요.', addAlert: false };
     }
   };
 
@@ -114,22 +212,317 @@ export const ChatbotCore = forwardRef<HTMLDivElement, ChatbotCoreProps>(
     setShowAlert(true);
     setAlertsExpanded(true);
 
+    // 첫 번째 메시지: 이미지가 첨부되었습니다
     setTimeout(() => {
-      const botMessage: Message = {
+      const uploadConfirmMessage: Message = {
         id: (Date.now() + 1).toString(),
         type: 'bot',
-        content: `아래 정보가 추출되어 자동입력 되었습니다.\n\n이름: 홍길동\n주민등록번호: 870211-1******\n주소: 서울특별시 영등포구 국제금융로 79\n\n추가로 입력하거나 수정할 내용이 있으면 작성해주세요.`,
+        content: '이미지가 첨부되었습니다.',
         timestamp: new Date(),
         tab: activeTab,
       };
-      setMessages(prev => [...prev, botMessage]);
+      setMessages(prev => [...prev, uploadConfirmMessage]);
+    }, 500);
+
+    // 두 번째 메시지: 내용을 분석하고 있습니다
+    setTimeout(() => {
+      const analyzingMessage: Message = {
+        id: (Date.now() + 2).toString(),
+        type: 'bot',
+        content: '내용을 분석하고 있습니다...',
+        timestamp: new Date(),
+        tab: activeTab,
+      };
+      setMessages(prev => [...prev, analyzingMessage]);
     }, 1500);
+
+    // 이미지 파일인 경우 실제 OCR 수행
+    if (file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const imageData = event.target?.result;
+        if (!imageData) {
+          setTimeout(() => {
+            const extractedInfo = extractTextFromImage(file.name);
+            displayOCRResults(extractedInfo);
+          }, 3000);
+          return;
+        }
+
+        Tesseract.recognize(
+          imageData as string,
+          'kor+eng',
+          {
+            logger: (m) => {
+              if (m.status === 'recognizing text') {
+                console.log(`OCR: ${Math.round(m.progress * 100)}%`);
+              }
+            }
+          }
+        ).then(({ data: { text } }) => {
+          console.log('OCR Text:', text);
+          processOCRText(text, file.name);
+        }).catch((error) => {
+          console.error('OCR Error:', error);
+          setTimeout(() => {
+            const extractedInfo = extractTextFromImage(file.name);
+            displayOCRResults(extractedInfo);
+          }, 3000);
+        });
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setTimeout(() => {
+        const extractedInfo = extractTextFromImage(file.name);
+        displayOCRResults(extractedInfo);
+      }, 3000);
+    }
+  };
+
+  const processOCRText = (text: string, fileName: string) => {
+    if (!text || text.trim().length === 0) {
+      setTimeout(() => {
+        const noTextMessage: Message = {
+          id: (Date.now() + 3).toString(),
+          type: 'bot',
+          content: '이미지에서 텍스트를 찾을 수 없습니다. 직접 정보를 입력해주세요.',
+          timestamp: new Date(),
+          tab: activeTab,
+        };
+        setMessages(prev => [...prev, noTextMessage]);
+      }, 3000);
+      return;
+    }
+
+    const extractedData: any = {};
+    const fields: string[] = [];
+    let message = '첨부된 파일을 분석한 결과 다음 정보가 감지되었습니다.';
+    let diseaseMessage = '';
+
+    const nameMatch = text.match(/[가-힣]{2,4}/);
+    if (nameMatch) {
+      extractedData.name = nameMatch[0];
+      fields.push('이름');
+    }
+
+    const phoneMatch = text.match(/0\d{1,2}[-\s]?\d{3,4}[-\s]?\d{4}/);
+    if (phoneMatch) {
+      extractedData.phone = phoneMatch[0];
+      fields.push('전화번호');
+    }
+
+    const addressMatch = text.match(/(서울|부산|대구|인천|광주|대전|울산|세종|경기|강원|충청|전라|경상|제주)[^\n]{10,50}/);
+    if (addressMatch) {
+      extractedData.address = addressMatch[0];
+      fields.push('주소');
+    }
+
+    const idNumberMatch = text.match(/\d{6}[-\s]?\d{7}/);
+    if (idNumberMatch) {
+      const idNum = idNumberMatch[0].replace(/[-\s]/g, '');
+      extractedData.idNumber = idNum.slice(0, 6) + '-' + idNum[6] + '******';
+      fields.push('주민등록번호');
+    }
+
+    const diseases: string[] = [];
+    if (text.includes('고혈압') || text.includes('I10')) {
+      diseases.push('I10 고혈압');
+    }
+    if (text.includes('당뇨') || text.includes('E11')) {
+      diseases.push('E11 제2형 당뇨병');
+    }
+    if (diseases.length > 0) {
+      extractedData.diseases = diseases;
+      fields.push('병력 정보');
+      diseaseMessage = diseases.map(d => '-' + d).join('\n');
+      message = `첨부된 파일을 분석한 결과 고지대상 질병 ${diseases.length}건이 감지되었습니다.`;
+    }
+
+    if (fields.length === 0) {
+      const extractedInfo = extractTextFromImage(fileName);
+      displayOCRResults(extractedInfo);
+      return;
+    }
+
+    const extractedInfo = {
+      hasText: true,
+      message,
+      diseaseMessage,
+      fields,
+      data: extractedData
+    };
+
+    displayOCRResults(extractedInfo);
+  };
+
+  const displayOCRResults = (extractedInfo: any) => {
+    setTimeout(() => {
+      if (extractedInfo.hasText) {
+        const extractionMessage: Message = {
+          id: (Date.now() + 3).toString(),
+          type: 'bot',
+          content: extractedInfo.message,
+          timestamp: new Date(),
+          tab: activeTab,
+        };
+        setMessages(prev => [...prev, extractionMessage]);
+        
+        if (extractedInfo.diseaseMessage) {
+          setTimeout(() => {
+            const diseaseListMessage: Message = {
+              id: (Date.now() + 4).toString(),
+              type: 'bot',
+              content: extractedInfo.diseaseMessage || '',
+              timestamp: new Date(),
+              tab: activeTab,
+            };
+            setMessages(prev => [...prev, diseaseListMessage]);
+          }, 800);
+        }
+        
+        setTimeout(() => {
+          const confirmMessage: Message = {
+            id: (Date.now() + 5).toString(),
+            type: 'bot',
+            content: '병력고지에 반영하시겠습니까?',
+            timestamp: new Date(),
+            tab: activeTab,
+            hasButtons: true,
+            extractedData: extractedInfo.data,
+          };
+          setMessages(prev => [...prev, confirmMessage]);
+        }, extractedInfo.diseaseMessage ? 1600 : 800);
+      } else {
+        const noTextMessage: Message = {
+          id: (Date.now() + 3).toString(),
+          type: 'bot',
+          content: '이미지에서 텍스트를 찾을 수 없습니다. 직접 정보를 입력해주세요.',
+          timestamp: new Date(),
+          tab: activeTab,
+        };
+        setMessages(prev => [...prev, noTextMessage]);
+      }
+    }, 3000);
+  };
+
+  // OCR 시뮬레이션 함수 (실제로는 OCR API 사용)
+  const extractTextFromImage = (fileName: string): { 
+    hasText: boolean; 
+    message: string; 
+    diseaseMessage?: string;
+    fields: string[];
+    data?: any;
+  } => {
+    // 파일명이나 실제 OCR 결과에 따라 다른 결과 반환
+    // 실제 구현에서는 Tesseract.js 또는 서버 OCR API 사용
+    
+    // 샘플: 진단서/병원 문서
+    if (fileName.includes('진단서') || fileName.includes('의료') || fileName.includes('병원')) {
+      return {
+        hasText: true,
+        message: '첨부된 파일을 분석한 결과 고지대상 질병 2건이 감지되었습니다.',
+        diseaseMessage: '-E11 제2형 당뇨병\n-I10 고혈압',
+        fields: ['환자명', '진단명', '진료일자'],
+        data: {
+          diseases: ['E11 제2형 당뇨병', 'I10 고혈압'],
+          patient: '이영희',
+          date: '2024-01-15'
+        }
+      };
+    }
+    // 샘플: 신분증 이미지로 가정
+    else if (fileName.includes('신분증') || fileName.includes('증명') || fileName.includes('ID')) {
+      return {
+        hasText: true,
+        message: '첨부된 파일을 분석한 결과 개인정보가 감지되었습니다.',
+        fields: ['이름', '주민등록번호', '주소'],
+        data: {
+          name: '홍길동',
+          idNumber: '870211-1******',
+          address: '서울특별시 영등포구 국제금융로 79'
+        }
+      };
+    } else if (fileName.includes('명함') || fileName.includes('card')) {
+      return {
+        hasText: true,
+        message: '첨부된 파일을 분석한 결과 연락처 정보가 감지되었습니다.',
+        fields: ['이름', '회사명', '직책', '전화번호'],
+        data: {
+          name: '김철수',
+          company: '(주)미래에셋생명',
+          position: '부장',
+          phone: '02-1234-5678'
+        }
+      };
+    } else {
+      // 일반 이미지 - 텍스트가 없을 수 있음
+      return {
+        hasText: false,
+        message: '',
+        fields: []
+      };
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
+    }
+  };
+
+  // 예/아니오 버튼 클릭 핸들러
+  const handleConfirmExtraction = (messageId: string, extractedData: any, confirmed: boolean) => {
+    if (confirmed) {
+      // "예" 버튼 - 좌측 폼에 데이터 전송
+      const event = new CustomEvent('chatbot-form-update', {
+        detail: extractedData
+      });
+      window.dispatchEvent(event);
+      
+      // 확인 메시지 추가
+      const confirmMsg: Message = {
+        id: (Date.now() + 100).toString(),
+        type: 'bot',
+        content: '정보가 좌측 입력폼에 반영되었습니다.',
+        timestamp: new Date(),
+        tab: activeTab,
+      };
+      setMessages(prev => [...prev, confirmMsg]);
+      
+      // 알림 추가
+      const fieldNames = Object.keys(extractedData).map(key => {
+        if (key === 'diseases') return '병력 정보';
+        if (key === 'name') return '이름';
+        if (key === 'idNumber') return '주민등록번호';
+        if (key === 'address') return '주소';
+        if (key === 'phone') return '전화번호';
+        return key;
+      });
+      
+      fieldNames.forEach((fieldName, index) => {
+        setTimeout(() => {
+          const fieldAlert: Alert = {
+            id: (Date.now() + 200 + index).toString(),
+            message: `'${fieldName}'가 입력되었습니다.`,
+            timestamp: new Date(),
+          };
+          setAlerts(prev => [...prev, fieldAlert]);
+        }, index * 200);
+      });
+      
+      setShowAlert(true);
+      setAlertsExpanded(true);
+    } else {
+      // "아니오" 버튼 - 취소 메시지
+      const cancelMsg: Message = {
+        id: (Date.now() + 100).toString(),
+        type: 'bot',
+        content: '취소되었습니다. 수동으로 정보를 입력해주세요.',
+        timestamp: new Date(),
+        tab: activeTab,
+      };
+      setMessages(prev => [...prev, cancelMsg]);
     }
   };
 
@@ -374,37 +767,117 @@ export const ChatbotCore = forwardRef<HTMLDivElement, ChatbotCoreProps>(
         </div>
       </div>
 
-      {/* Toggle Alerts - Only show when file uploaded */}
+      {/* Toggle Alerts - Show when file uploaded or info entered */}
       {showAlert && (
         <>
           {alertsExpanded ? (
             <div className="chatbot-core-alerts">
               <div className="chatbot-core-alerts-content">
-                <div className="chatbot-core-alert-item chatbot-core-alert-gradient">
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                    <circle cx="8" cy="8" r="6" stroke="url(#gradient_chatbot)" strokeWidth="4"/>
-                    <defs>
-                      <linearGradient id="gradient_chatbot" x1="3.5" y1="2.5" x2="14" y2="14.5">
-                        <stop stopColor="#835EF9"/>
-                        <stop offset="0.956653" stopColor="#30BFE2"/>
-                      </linearGradient>
-                    </defs>
-                  </svg>
-                  <p>'{uploadedFileName || '카카오톡이미지.jpg'}'파일이 첨부되었습다.</p>
-                </div>
+                {uploadedFileName && (
+                  <div className="chatbot-core-alert-item chatbot-core-alert-gradient">
+                    {currentTheme === 'night-universe' ? (
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <g clipPath="url(#clip0_night_alert)">
+                          <path d={svgPathsNightAlert.pd80c480} stroke="white" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.14062" />
+                          <path d={svgPathsNightAlert.p1f2c5400} stroke="white" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.14062" />
+                        </g>
+                        <defs>
+                          <clipPath id="clip0_night_alert">
+                            <rect fill="white" height="16" width="16" />
+                          </clipPath>
+                        </defs>
+                      </svg>
+                    ) : currentTheme === 'mirae-ai' ? (
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <g clipPath="url(#clip0_mirae_alert)">
+                          <path d={svgPathsMiraeAlert.pd80c480} stroke="#FFAB0F" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.14062" />
+                          <path d={svgPathsMiraeAlert.p1f2c5400} stroke="#FFAB0F" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.14062" />
+                        </g>
+                        <defs>
+                          <clipPath id="clip0_mirae_alert">
+                            <rect fill="white" height="16" width="16" />
+                          </clipPath>
+                        </defs>
+                      </svg>
+                    ) : (
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <circle cx="8" cy="8" r="6" stroke="url(#gradient_chatbot)" strokeWidth="4"/>
+                        <defs>
+                          <linearGradient id="gradient_chatbot" x1="3.5" y1="2.5" x2="14" y2="14.5">
+                            <stop stopColor="#835EF9"/>
+                            <stop offset="0.956653" stopColor="#30BFE2"/>
+                          </linearGradient>
+                        </defs>
+                      </svg>
+                    )}
+                    <p>'{uploadedFileName}'파일이 첨부되었습니다.</p>
+                  </div>
+                )}
+                {alerts.map((alert) => (
+                  <div key={alert.id} className="chatbot-core-alert-item chatbot-core-alert-gradient">
+                    {currentTheme === 'night-universe' ? (
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <g clipPath="url(#clip0_night_alert_info)">
+                          <path d={svgPathsNightAlert.pd80c480} stroke="white" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.14062" />
+                          <path d={svgPathsNightAlert.p1f2c5400} stroke="white" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.14062" />
+                        </g>
+                        <defs>
+                          <clipPath id="clip0_night_alert_info">
+                            <rect fill="white" height="16" width="16" />
+                          </clipPath>
+                        </defs>
+                      </svg>
+                    ) : currentTheme === 'mirae-ai' ? (
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <g clipPath="url(#clip0_mirae_alert_info)">
+                          <path d={svgPathsMiraeAlert.pd80c480} stroke="#FFAB0F" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.14062" />
+                          <path d={svgPathsMiraeAlert.p1f2c5400} stroke="#FFAB0F" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.14062" />
+                        </g>
+                        <defs>
+                          <clipPath id="clip0_mirae_alert_info">
+                            <rect fill="white" height="16" width="16" />
+                          </clipPath>
+                        </defs>
+                      </svg>
+                    ) : (
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <circle cx="8" cy="8" r="6" stroke="url(#gradient_chatbot_alert)" strokeWidth="4"/>
+                        <defs>
+                          <linearGradient id="gradient_chatbot_alert" x1="3.5" y1="2.5" x2="14" y2="14.5">
+                            <stop stopColor="#835EF9"/>
+                            <stop offset="0.956653" stopColor="#30BFE2"/>
+                          </linearGradient>
+                        </defs>
+                      </svg>
+                    )}
+                    <p>{alert.message}</p>
+                  </div>
+                ))}
               </div>
               <button className="chatbot-core-toggle-btn" onClick={toggleAlerts}>
-                <svg width="10" height="6" viewBox="0 0 11.5 6.5" fill="none">
-                  <path d={svgPaths.p2be18f20} stroke="#397EEE" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-                </svg>
+                {currentTheme === 'mirae-ai' ? (
+                  <svg width="10" height="6" viewBox="0 0 11.5 6.5" fill="none">
+                    <path d={svgPathsMiraeToggle.p2be18f20} stroke="#BDBDBD" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
+                  </svg>
+                ) : (
+                  <svg width="10" height="6" viewBox="0 0 11.5 6.5" fill="none">
+                    <path d={svgPaths.p2be18f20} stroke="#397EEE" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
+                  </svg>
+                )}
               </button>
             </div>
           ) : (
             <div className="chatbot-core-alerts-collapsed">
               <button className="chatbot-core-toggle-btn-collapsed" onClick={toggleAlerts}>
-                <svg width="10" height="6" viewBox="0 0 11.5 6.5" fill="none" className="chatbot-core-svg-rotated">
-                  <path d={svgPaths.p2be18f20} stroke="#397EEE" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-                </svg>
+                {currentTheme === 'mirae-ai' ? (
+                  <svg width="10" height="6" viewBox="0 0 11.5 6.5" fill="none" className="chatbot-core-svg-rotated">
+                    <path d={svgPathsMiraeToggle.p2be18f20} stroke="#BDBDBD" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
+                  </svg>
+                ) : (
+                  <svg width="10" height="6" viewBox="0 0 11.5 6.5" fill="none" className="chatbot-core-svg-rotated">
+                    <path d={svgPaths.p2be18f20} stroke="#397EEE" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
+                  </svg>
+                )}
               </button>
             </div>
           )}
@@ -421,6 +894,22 @@ export const ChatbotCore = forwardRef<HTMLDivElement, ChatbotCoreProps>(
                   {message.content.split('\n').map((line, i) => (
                     <p key={i}>{line}</p>
                   ))}
+                  {message.hasButtons && message.extractedData && (
+                    <div className="chatbot-core-button-group">
+                      <button 
+                        className="chatbot-core-confirm-btn"
+                        onClick={() => handleConfirmExtraction(message.id, message.extractedData, true)}
+                      >
+                        예
+                      </button>
+                      <button 
+                        className="chatbot-core-confirm-btn"
+                        onClick={() => handleConfirmExtraction(message.id, message.extractedData, false)}
+                      >
+                        아니요
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             ) : (
@@ -460,8 +949,8 @@ export const ChatbotCore = forwardRef<HTMLDivElement, ChatbotCoreProps>(
               <path d={svgPathsAttach.p1c423f00} fill="#5B5FC7" />
             </svg>
           ) : currentTheme === 'mirae-ai' ? (
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M10 4V16M4 10H16" stroke="#df6728" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+              <path d={svgPathsMiraeAttach.p1fa6e700} stroke="#1A309C" strokeLinecap="round" strokeWidth="2" />
             </svg>
           ) : currentTheme === 'night-universe' ? (
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -481,22 +970,27 @@ export const ChatbotCore = forwardRef<HTMLDivElement, ChatbotCoreProps>(
             onChange={(e) => setInputValue(e.target.value)}
             onKeyPress={handleKeyPress}
           />
-          <button className="chatbot-core-send-btn" onClick={handleSendMessage}>
-            {currentTheme === 'mirae-ai' ? (
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path d="M2.5 10L17.5 2.5L10 17.5L8.125 11.875L2.5 10Z" fill="#df6728" stroke="#df6728" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          {currentTheme !== 'night-universe' && currentTheme !== 'mirae-ai' && (
+            <button className="chatbot-core-send-btn" onClick={handleSendMessage}>
+              <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                <path d={svgPathsSendBlue.pb08c800} fill="#5B5FC7" />
               </svg>
-            ) : currentTheme === 'night-universe' ? (
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path d="M2.5 10L17.5 2.5L10 17.5L8.125 11.875L2.5 10Z" fill="white" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            ) : (
-              <svg width="20" height="20" viewBox="0 0 30 30" fill="none">
-                <path d={svgPaths.pb08c800} fill="#5B5FC7" />
-              </svg>
-            )}
-          </button>
+            </button>
+          )}
         </div>
+        {currentTheme === 'mirae-ai' && (
+          <button className="chatbot-core-send-btn-mirae" onClick={handleSendMessage}>
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d={svgPathsMiraeBottom.p15a46a00} stroke="#1A309C" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.66667" />
+              <path d={svgPathsMiraeBottom.p136f3380} stroke="#1A309C" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.66667" />
+            </svg>
+          </button>
+        )}
+        {currentTheme === 'night-universe' && (
+          <button className="chatbot-core-send-btn-night" onClick={handleSendMessage}>
+            <img src={sendBtnNightImage} alt="Send" style={{ width: '40px', height: '40px', borderRadius: '10px' }} />
+          </button>
+        )}
       </div>
     </div>
   );
