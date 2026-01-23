@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 챗봇 - 완전한 버전</title>
+    
+    <!-- CSS 파일들 -->
+    <link rel="stylesheet" href="./css/chatbot-core.css" />
+    <link rel="stylesheet" href="./css/modal2-styles.css" />
+    <link rel="stylesheet" href="./css/modal3-styles.css" />
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            overflow-x: hidden;
+        }
+        
+        .page-container {
+            min-height: 100vh;
+            position: relative;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .page-content {
+            text-align: center;
+            color: white;
+            padding: 40px;
+        }
+        
+        .page-content h1 {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        
+        .page-content p {
+            font-size: 20px;
+            opacity: 0.9;
+            margin-bottom: 40px;
+        }
+        
+        .demo-info {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .demo-info h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        
+        .demo-info ul {
+            list-style: none;
+            text-align: left;
+            line-height: 1.8;
+        }
+        
+        .demo-info li {
+            padding: 8px 0;
+            padding-left: 24px;
+            position: relative;
+        }
+        
+        .demo-info li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+        
+        /* Chatbot Trigger Buttons */
+        .chatbot-trigger-btn {
+            position: fixed;
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            border: none;
+            cursor: grab;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            background: transparent;
+            padding: 0;
+        }
+        
+        .chatbot-trigger-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .chatbot-trigger-btn:active {
+            cursor: grabbing;
+        }
+        
+        .chatbot-btn-1 {
+            bottom: 30px;
+            right: 30px;
+        }
+        
+        .chatbot-btn-2 {
+            bottom: 110px;
+            right: 30px;
+        }
+        
+        .chatbot-btn-3 {
+            bottom: 190px;
+            right: 30px;
+        }
+        
+        .trigger-gradient {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .chatbot-btn-1 .trigger-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .chatbot-btn-2 .trigger-gradient {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        
+        .chatbot-btn-3 .trigger-gradient {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        
+        .trigger-icon {
+            width: 36px;
+            height: 36px;
+            position: relative;
+            z-index: 2;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+        }
+        
+        .trigger-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 0.6;
+                transform: translate(-50%, -50%) scale(1);
+            }
+            50% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1.1);
+            }
+        }
+        
+        /* Modal 1 Styles - Floating Window */
+        .modal1-floating-window {
+            position: fixed;
+            width: 400px;
+            height: 600px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            cursor: default;
+        }
+        
+        .modal1-floating-window.dragging {
+            cursor: grabbing;
+        }
+        
+        .modal1-header {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: grab;
+        }
+        
+        .modal1-header.dragging {
+            cursor: grabbing;
+        }
+        
+        .modal1-title {
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .modal1-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .modal1-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            border: none;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+        
+        .modal1-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .modal1-body {
+            flex: 1;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <!-- Page Content -->
+    <div class="page-container">
+        <div class="page-content">
+            <h1>🤖 AI 챗봇 시스템</h1>
+            <p>WebSquare 폐쇄망 환경에서 작동하는 완전한 챗봇</p>
+            
+            <div class="demo-info">
+                <h2>사용 가능한 기능</h2>
+                <ul>
+                    <li>플로팅 드래그 가능한 채팅창 (버튼 1)</li>
+                    <li>개인정보 입력폼과 함께 뜨는 모달 (버튼 2)</li>
+                    <li>전체화면 모드 (버튼 3)</li>
+                    <li>파일 업로드 및 자동 폼 입력</li>
+                    <li>3가지 테마 변경 가능</li>
+                    <li>반응형 디자인 지원</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chatbot Trigger Buttons -->
+    <button class="chatbot-trigger-btn chatbot-btn-1" id="btn1" title="플로팅 채팅창">
+        <div class="trigger-gradient">
+            <svg class="trigger-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="32" cy="32" r="24" fill="white" opacity="0.9"/>
+                <g transform="translate(16, 16)">
+                    <path d="M16 2C8.268 2 2 7.462 2 14.188c0 3.312 1.456 6.325 3.844 8.5-.344 1.625-1.125 3.875-3.469 5.656-.25.188-.312.531-.156.812.156.281.469.438.781.438 3.625 0 6.469-1.781 7.906-2.969 1.344.406 2.781.625 4.281.625 7.732 0 14-5.462 14-12.188C30 7.462 23.732 2 16 2z" fill="#667eea"/>
+                    <circle cx="12" cy="14" r="2" fill="white"/>
+                    <circle cx="20" cy="14" r="2" fill="white"/>
+                </g>
+            </svg>
+            <div class="trigger-glow"></div>
+        </div>
+    </button>
+
+    <button class="chatbot-trigger-btn chatbot-btn-2" id="btn2" title="폼과 함께 채팅">
+        <div class="trigger-gradient">
+            <svg class="trigger-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="32" cy="32" r="24" fill="white" opacity="0.9"/>
+                <g transform="translate(16, 16)">
+                    <path d="M16 2C8.268 2 2 7.462 2 14.188c0 3.312 1.456 6.325 3.844 8.5-.344 1.625-1.125 3.875-3.469 5.656-.25.188-.312.531-.156.812.156.281.469.438.781.438 3.625 0 6.469-1.781 7.906-2.969 1.344.406 2.781.625 4.281.625 7.732 0 14-5.462 14-12.188C30 7.462 23.732 2 16 2z" fill="#f5576c"/>
+                    <circle cx="12" cy="14" r="2" fill="white"/>
+                    <circle cx="20" cy="14" r="2" fill="white"/>
+                </g>
+            </svg>
+            <div class="trigger-glow"></div>
+        </div>
+    </button>
+
+    <button class="chatbot-trigger-btn chatbot-btn-3" id="btn3" title="전체화면 모드">
+        <div class="trigger-gradient">
+            <svg class="trigger-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="32" cy="32" r="24" fill="white" opacity="0.9"/>
+                <g transform="translate(16, 16)">
+                    <path d="M16 2C8.268 2 2 7.462 2 14.188c0 3.312 1.456 6.325 3.844 8.5-.344 1.625-1.125 3.875-3.469 5.656-.25.188-.312.531-.156.812.156.281.469.438.781.438 3.625 0 6.469-1.781 7.906-2.969 1.344.406 2.781.625 4.281.625 7.732 0 14-5.462 14-12.188C30 7.462 23.732 2 16 2z" fill="#00f2fe"/>
+                    <circle cx="12" cy="14" r="2" fill="white"/>
+                    <circle cx="20" cy="14" r="2" fill="white"/>
+                </g>
+            </svg>
+            <div class="trigger-glow"></div>
+        </div>
+    </button>
+
+    <!-- Modal containers will be inserted here dynamically -->
+    <div id="modal-container"></div>
+
+    <!-- JavaScript Files -->
+    <script src="./js/chatbot-svg.js"></script>
+    <script src="./js/chatbot-core.js"></script>
+    
+    <script>
+        // Draggable Button System
+        (function() {
+            const buttons = document.querySelectorAll('.chatbot-trigger-btn');
+            
+            buttons.forEach(function(button) {
+                let isDragging = false;
+                let hasMoved = false;
+                let startX = 0;
+                let startY = 0;
+                let initialX = 0;
+                let initialY = 0;
+                
+                button.addEventListener('mousedown', function(e) {
+                    if (e.button !== 0) return;
+                    
+                    isDragging = true;
+                    hasMoved = false;
+                    startX = e.clientX;
+                    startY = e.clientY;
+                    
+                    const rect = button.getBoundingClientRect();
+                    initialX = rect.left;
+                    initialY = rect.top;
+                    
+                    button.style.cursor = 'grabbing';
+                    e.preventDefault();
+                });
+                
+                document.addEventListener('mousemove', function(e) {
+                    if (!isDragging) return;
+                    
+                    const deltaX = e.clientX - startX;
+                    const deltaY = e.clientY - startY;
+                    
+                    if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
+                        hasMoved = true;
+                        button.style.left = (initialX + deltaX) + 'px';
+                        button.style.top = (initialY + deltaY) + 'px';
+                        button.style.right = 'auto';
+                        button.style.bottom = 'auto';
+                    }
+                });
+                
+                document.addEventListener('mouseup', function(e) {
+                    if (!isDragging) return;
+                    
+                    isDragging = false;
+                    button.style.cursor = 'grab';
+                    
+                    // If moved, prevent click
+                    if (hasMoved) {
+                        setTimeout(function() {
+                            hasMoved = false;
+                        }, 100);
+                    }
+                });
+                
+                button.addEventListener('click', function(e) {
+                    if (hasMoved) {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        return;
+                    }
+                    
+                    const buttonId = button.id;
+                    if (buttonId === 'btn1') {
+                        openModal1();
+                    } else if (buttonId === 'btn2') {
+                        openModal2();
+                    } else if (buttonId === 'btn3') {
+                        openModal3();
+                    }
+                });
+            });
+        })();
+        
+        // Modal 1 - Floating Draggable Window
+        function openModal1() {
+            const container = document.getElementById('modal-container');
+            
+            const modal = document.createElement('div');
+            modal.className = 'modal1-floating-window';
+            modal.style.left = '50%';
+            modal.style.top = '50%';
+            modal.style.transform = 'translate(-50%, -50%)';
+            
+            modal.innerHTML = `
+                <div class="modal1-header" id="modal1-header">
+                    <div class="modal1-title">💬 AI 챗봇</div>
+                    <div class="modal1-actions">
+                        <button class="modal1-btn" id="modal1-maximize" title="전체화면">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                                <path d="M2 2h5v2H4v3H2V2zm7 0h5v5h-2V4h-3V2zM2 9h2v3h3v2H2V9zm12 0v5H9v-2h3v-3h2z"/>
+                            </svg>
+                        </button>
+                        <button class="modal1-btn" id="modal1-close" title="닫기">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                                <path d="M2.146 2.146a.5.5 0 0 1 .708 0L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854a.5.5 0 0 1 0-.708z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="modal1-body" id="modal1-body"></div>
+            `;
+            
+            container.appendChild(modal);
+            
+            // Initialize chatbot
+            if (window.ChatbotCore) {
+                window.ChatbotCore.init('modal1-body', {
+                    theme: 'blue-purple',
+                    onSendMessage: function(message) {
+                        console.log('메시지 전송:', message);
+                    }
+                });
+            }
+            
+            // Dragging
+            const header = document.getElementById('modal1-header');
+            let isDragging = false;
+            let startX, startY, initialX, initialY;
+            
+            header.addEventListener('mousedown', function(e) {
+                if (e.target.closest('button')) return;
+                
+                isDragging = true;
+                header.classList.add('dragging');
+                modal.classList.add('dragging');
+                
+                startX = e.clientX;
+                startY = e.clientY;
+                
+                const rect = modal.getBoundingClientRect();
+                initialX = rect.left;
+                initialY = rect.top;
+                
+                e.preventDefault();
+            });
+            
+            document.addEventListener('mousemove', function(e) {
+                if (!isDragging) return;
+                
+                const deltaX = e.clientX - startX;
+                const deltaY = e.clientY - startY;
+                
+                modal.style.left = (initialX + deltaX) + 'px';
+                modal.style.top = (initialY + deltaY) + 'px';
+                modal.style.transform = 'none';
+            });
+            
+            document.addEventListener('mouseup', function() {
+                if (isDragging) {
+                    isDragging = false;
+                    header.classList.remove('dragging');
+                    modal.classList.remove('dragging');
+                }
+            });
+            
+            // Close button
+            document.getElementById('modal1-close').addEventListener('click', function() {
+                modal.remove();
+            });
+            
+            // Maximize button
+            document.getElementById('modal1-maximize').addEventListener('click', function() {
+                modal.remove();
+                openModal3();
+            });
+        }
+        
+        // Modal 2 - Form with Chatbot
+        function openModal2() {
+            const container = document.getElementById('modal-container');
+            
+            const overlay = document.createElement('div');
+            overlay.className = 'modal2-dim-overlay';
+            
+            const mainContainer = document.createElement('div');
+            mainContainer.className = 'modal2-main-container';
+            
+            mainContainer.innerHTML = `
+                <div class="modal2-control-buttons">
+                    <button class="modal2-control-btn" id="modal2-maximize" title="전체화면">
+                        ${window.ChatbotSVG ? window.ChatbotSVG.maximize('white') : '⛶'}
+                    </button>
+                    <button class="modal2-control-btn" id="modal2-close" title="닫기">
+                        ${window.ChatbotSVG ? window.ChatbotSVG.close('white') : '✕'}
+                    </button>
+                </div>
+                
+                <div class="modal2-form-container">
+                    <div class="modal2-form-header">
+                        <div class="modal2-form-header-content">
+                            <div class="modal2-form-tabs">
+                                <div class="modal2-form-tab">
+                                    <p class="modal2-form-tab-text">개인정보 입력</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal2-form-body">
+                        <div class="modal2-form-field">
+                            <label class="modal2-form-label">이름</label>
+                            <input type="text" class="modal2-form-input" id="form-name" placeholder="이름을 입력하세요" />
+                        </div>
+                        
+                        <div class="modal2-form-field">
+                            <label class="modal2-form-label">전화번호</label>
+                            <div class="modal2-phone-grid">
+                                <select class="modal2-form-select modal2-phone-select" id="form-phone1">
+                                    <option>010</option>
+                                    <option>011</option>
+                                    <option>016</option>
+                                    <option>017</option>
+                                    <option>018</option>
+                                    <option>019</option>
+                                </select>
+                                <input type="text" class="modal2-form-input modal2-phone-input" id="form-phone2" maxlength="4" placeholder="0000" />
+                                <input type="text" class="modal2-form-input modal2-phone-input" id="form-phone3" maxlength="4" placeholder="0000" />
+                            </div>
+                        </div>
+                        
+                        <div class="modal2-form-field">
+                            <label class="modal2-form-label">주소</label>
+                            <input type="text" class="modal2-form-input" id="form-address" placeholder="주소를 입력하세요" />
+                        </div>
+                        
+                        <div class="modal2-form-field">
+                            <label class="modal2-form-label">이메일</label>
+                            <div class="modal2-email-grid">
+                                <input type="text" class="modal2-form-input" id="form-email1" placeholder="이메일" />
+                                <span class="modal2-email-at">@</span>
+                                <input type="text" class="modal2-form-input" id="form-email2" placeholder="도메인" />
+                            </div>
+                        </div>
+                        
+                        <div class="modal2-form-actions">
+                            <button class="modal2-submit-btn">제출</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal2-chat-container">
+                    <div id="modal2-chatbot"></div>
+                </div>
+            `;
+            
+            container.appendChild(overlay);
+            container.appendChild(mainContainer);
+            
+            // Initialize chatbot
+            if (window.ChatbotCore) {
+                window.ChatbotCore.init('modal2-chatbot', {
+                    theme: 'blue-purple',
+                    onSendMessage: function(message) {
+                        console.log('메시지 전송:', message);
+                        // Auto-fill form fields from message
+                        autoFillForm(message);
+                    }
+                });
+            }
+            
+            // Close button
+            document.getElementById('modal2-close').addEventListener('click', function() {
+                overlay.remove();
+                mainContainer.remove();
+            });
+            
+            // Maximize button
+            document.getElementById('modal2-maximize').addEventListener('click', function() {
+                overlay.remove();
+                mainContainer.remove();
+                openModal3();
+            });
+        }
+        
+        // Modal 3 - Fullscreen Mode
+        function openModal3() {
+            const container = document.getElementById('modal-container');
+            
+            const overlay = document.createElement('div');
+            overlay.className = 'modal3-dim-overlay';
+            
+            const fullscreen = document.createElement('div');
+            fullscreen.className = 'modal-fullscreen';
+            fullscreen.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)';
+            
+            const formPopup = document.createElement('div');
+            formPopup.className = 'modal3-form-popup';
+            
+            formPopup.innerHTML = `
+                <div class="modal3-form-header">
+                    <div class="modal3-form-title">
+                        <h2>개인정보 입력</h2>
+                    </div>
+                    <button class="modal3-form-close" id="modal3-close">
+                        ${window.ChatbotSVG ? window.ChatbotSVG.close('#666') : '✕'}
+                    </button>
+                </div>
+                <div class="modal3-form-body">
+                    <div class="modal3-form-field">
+                        <label>이름</label>
+                        <input type="text" id="form3-name" placeholder="이름을 입력하세요" />
+                    </div>
+                    
+                    <div class="modal3-form-field">
+                        <label>전화번호</label>
+                        <div class="modal3-phone-inputs">
+                            <select id="form3-phone1">
+                                <option>010</option>
+                                <option>011</option>
+                                <option>016</option>
+                            </select>
+                            <input type="text" id="form3-phone2" maxlength="4" placeholder="0000" />
+                            <input type="text" id="form3-phone3" maxlength="4" placeholder="0000" />
+                        </div>
+                    </div>
+                    
+                    <div class="modal3-form-field">
+                        <label>주소</label>
+                        <input type="text" id="form3-address" placeholder="주소를 입력하세요" />
+                    </div>
+                    
+                    <div class="modal3-form-field">
+                        <label>이메일</label>
+                        <div class="modal3-email-inputs">
+                            <input type="text" id="form3-email1" placeholder="이메일" />
+                            <span>@</span>
+                            <input type="text" id="form3-email2" placeholder="도메인" />
+                        </div>
+                    </div>
+                    
+                    <div class="modal3-form-actions">
+                        <button class="modal3-submit-btn">제출</button>
+                    </div>
+                </div>
+            `;
+            
+            const chatWidget = document.createElement('div');
+            chatWidget.className = 'modal3-chatbot-widget';
+            chatWidget.id = 'modal3-chatbot';
+            
+            container.appendChild(overlay);
+            container.appendChild(fullscreen);
+            container.appendChild(formPopup);
+            container.appendChild(chatWidget);
+            
+            // Initialize chatbot
+            if (window.ChatbotCore) {
+                window.ChatbotCore.init('modal3-chatbot', {
+                    theme: 'mirae-ai',
+                    onSendMessage: function(message) {
+                        console.log('메시지 전송:', message);
+                        autoFillForm3(message);
+                    }
+                });
+            }
+            
+            // Close button
+            document.getElementById('modal3-close').addEventListener('click', function() {
+                overlay.remove();
+                fullscreen.remove();
+                formPopup.remove();
+                chatWidget.remove();
+            });
+        }
+        
+        // Auto-fill form from chatbot message (Modal 2)
+        function autoFillForm(message) {
+            // 전화번호 패턴 (010-1234-5678 또는 01012345678)
+            const phonePattern = /(\d{3})[- ]?(\d{3,4})[- ]?(\d{4})/;
+            const phoneMatch = message.match(phonePattern);
+            if (phoneMatch) {
+                document.getElementById('form-phone1').value = phoneMatch[1];
+                document.getElementById('form-phone2').value = phoneMatch[2];
+                document.getElementById('form-phone3').value = phoneMatch[3];
+            }
+            
+            // 이메일 패턴
+            const emailPattern = /([a-zA-Z0-9._-]+)@([a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/;
+            const emailMatch = message.match(emailPattern);
+            if (emailMatch) {
+                document.getElementById('form-email1').value = emailMatch[1];
+                document.getElementById('form-email2').value = emailMatch[2];
+            }
+            
+            // 이름 패턴 (간단하게)
+            const namePattern = /이름[은는:]\s*([가-힣]{2,4})/;
+            const nameMatch = message.match(namePattern);
+            if (nameMatch) {
+                document.getElementById('form-name').value = nameMatch[1];
+            }
+        }
+        
+        // Auto-fill form from chatbot message (Modal 3)
+        function autoFillForm3(message) {
+            const phonePattern = /(\d{3})[- ]?(\d{3,4})[- ]?(\d{4})/;
+            const phoneMatch = message.match(phonePattern);
+            if (phoneMatch) {
+                document.getElementById('form3-phone1').value = phoneMatch[1];
+                document.getElementById('form3-phone2').value = phoneMatch[2];
+                document.getElementById('form3-phone3').value = phoneMatch[3];
+            }
+            
+            const emailPattern = /([a-zA-Z0-9._-]+)@([a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/;
+            const emailMatch = message.match(emailPattern);
+            if (emailMatch) {
+                document.getElementById('form3-email1').value = emailMatch[1];
+                document.getElementById('form3-email2').value = emailMatch[2];
+            }
+            
+            const namePattern = /이름[은는:]\s*([가-힣]{2,4})/;
+            const nameMatch = message.match(namePattern);
+            if (nameMatch) {
+                document.getElementById('form3-name').value = nameMatch[1];
+            }
+        }
+    </script>
+</body>
+</html>

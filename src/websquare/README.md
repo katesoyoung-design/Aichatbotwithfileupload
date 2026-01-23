@@ -1,24 +1,59 @@
 # WebSquare 챗봇 통합 가이드
 
+---
+
+## 🚨 폐쇄망 환경 (인터넷 없음) - 완전판 ⭐ NEW!
+
+**인터넷이 안 되는 환경**에서 3개 버튼의 완전한 챗봇 시스템을 사용하려면:
+
+### ⚡ 빠른 시작 (10초)
+```bash
+파일 탐색기에서:
+websquare/chatbot-complete.html 더블클릭!
+```
+
+✅ **모든 기능 포함:**
+- 3개의 드래그 가능한 챗봇 버튼
+- 플로팅 창 / 폼+챗봇 / 전체화면 모드
+- 파일 업로드 및 자동 폼 입력
+- 3가지 테마 변경
+- **인터넷 연결 불필요!**
+
+### 📚 상세 가이드
+- **[QUICK-START.md](QUICK-START.md)** - 1분 안에 시작하기 ⭐
+- **[OFFLINE-COMPLETE-GUIDE.md](OFFLINE-COMPLETE-GUIDE.md)** - 폐쇄망 완전 가이드
+- **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** - 문제 해결
+
+---
+
 ## 📁 폴더 구조
 
 ```
 /websquare/
+  ├── chatbot-complete.html      # ⭐ 폐쇄망용 완전판 (3개 버튼)
   ├── chatbot.xml                # WebSquare UI 정의 파일
   ├── chatbot-inline.html        # div 직접 포함 예제
   ├── chatbot-with-form.xml      # WebSquare 폼 연동 예제
   ├── form-example.html          # 폼 연동 테스트 예제
-  ├── universal-example.html     # 범용 위젯 예제 ⭐
+  ├── universal-example.html     # 범용 위젯 예제
   ├── css/
-  │   └── chatbot-core.css       # 챗봇 스타일시트
+  │   ├── chatbot-core.css       # 챗봇 코어 스타일
+  │   ├── modal2-styles.css      # ⭐ 모달2 (폼+챗봇) 스타일
+  │   └── modal3-styles.css      # ⭐ 모달3 (전체화면) 스타일
   ├── js/
-  │   ├── chatbot-widget.js      # 범용 위젯 (한 줄 로드) ⭐ 신규
+  │   ├── chatbot-widget.js      # 범용 위젯 (한 줄 로드)
   │   ├── chatbot-core.js        # 챗봇 핵심 로직
   │   └── chatbot-svg.js         # SVG 아이콘 모듈
+  ├── images/
+  │   └── chatbot-icon.svg       # ⭐ 챗봇 아이콘
   ├── README.md                  # 이 파일
-  ├── UNIVERSAL-GUIDE.md         # 범용 위젯 가이드 ⭐ 신규
+  ├── QUICK-START.md             # ⭐ 빠른 시작 가이드
+  ├── OFFLINE-COMPLETE-GUIDE.md  # ⭐ 폐쇄망 완전 가이드
+  ├── UNIVERSAL-GUIDE.md         # 범용 위젯 가이드
   └── TROUBLESHOOTING.md         # 문제 해결 가이드
 ```
+
+---
 
 ## ⚡ 가장 빠른 시작 (권장)
 

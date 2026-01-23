@@ -133,14 +133,33 @@ var ChatbotCore = (function() {
     function fillPhoneInputs(part1, part2, part3) {
         console.log('전화번호 추출:', part1, part2, part3);
         
-        // 같은 페이지에서 시도
-        var phone1 = document.getElementById('phone1');
-        var phone2 = document.getElementById('phone2');
-        var phone3 = document.getElementById('phone3');
+        // 여러 가능한 ID 패턴 시도 (WebSquare 5.0.4 호환)
+        var phoneIds = [
+            ['form-phone1', 'form-phone2', 'form-phone3'],
+            ['form3-phone1', 'form3-phone2', 'form3-phone3'],
+            ['phone1', 'phone2', 'phone3'],
+            ['input_phone1', 'input_phone2', 'input_phone3']
+        ];
         
-        if (phone1) phone1.value = part1;
-        if (phone2) phone2.value = part2;
-        if (phone3) phone3.value = part3;
+        var filled = false;
+        for (var i = 0; i < phoneIds.length; i++) {
+            var phone1 = document.getElementById(phoneIds[i][0]);
+            var phone2 = document.getElementById(phoneIds[i][1]);
+            var phone3 = document.getElementById(phoneIds[i][2]);
+            
+            if (phone1 && phone2 && phone3) {
+                phone1.value = part1;
+                phone2.value = part2;
+                phone3.value = part3;
+                filled = true;
+                console.log('전화번호 입력 성공:', phoneIds[i]);
+                break;
+            }
+        }
+        
+        if (!filled) {
+            console.warn('전화번호 입력 필드를 찾을 수 없습니다.');
+        }
         
         // 데이터 전송
         dispatchFormData({type: 'phone', value: part1 + '-' + part2 + '-' + part3, parts: [part1, part2, part3]});
@@ -152,11 +171,32 @@ var ChatbotCore = (function() {
     function fillEmailInputs(localPart, domain) {
         console.log('이메일 추출:', localPart, domain);
         
-        var emailLocal = document.getElementById('email_local');
-        var emailDomain = document.getElementById('email_domain');
+        // 여러 가능한 ID 패턴 시도 (WebSquare 5.0.4 호환)
+        var emailIds = [
+            ['form-email1', 'form-email2'],
+            ['form3-email1', 'form3-email2'],
+            ['email_local', 'email_domain'],
+            ['email1', 'email2'],
+            ['input_email1', 'input_email2']
+        ];
         
-        if (emailLocal) emailLocal.value = localPart;
-        if (emailDomain) emailDomain.value = domain;
+        var filled = false;
+        for (var i = 0; i < emailIds.length; i++) {
+            var emailLocal = document.getElementById(emailIds[i][0]);
+            var emailDomain = document.getElementById(emailIds[i][1]);
+            
+            if (emailLocal && emailDomain) {
+                emailLocal.value = localPart;
+                emailDomain.value = domain;
+                filled = true;
+                console.log('이메일 입력 성공:', emailIds[i]);
+                break;
+            }
+        }
+        
+        if (!filled) {
+            console.warn('이메일 입력 필드를 찾을 수 없습니다.');
+        }
         
         // 데이터 전송
         dispatchFormData({type: 'email', value: localPart + '@' + domain, localPart: localPart, domain: domain});
@@ -168,9 +208,31 @@ var ChatbotCore = (function() {
     function fillNameInput(name) {
         console.log('이름 추출:', name);
         
-        var nameInput = document.getElementById('name');
+        // 여러 가능한 ID 패턴 시도 (WebSquare 5.0.4 호환)
+        var nameIds = [
+            'form-name',
+            'form3-name',
+            'name',
+            'input_name',
+            'customer_name',
+            'userName'
+        ];
         
-        if (nameInput) nameInput.value = name;
+        var filled = false;
+        for (var i = 0; i < nameIds.length; i++) {
+            var nameInput = document.getElementById(nameIds[i]);
+            
+            if (nameInput) {
+                nameInput.value = name;
+                filled = true;
+                console.log('이름 입력 성공:', nameIds[i]);
+                break;
+            }
+        }
+        
+        if (!filled) {
+            console.warn('이름 입력 필드를 찾을 수 없습니다.');
+        }
         
         // 데이터 전송
         dispatchFormData({type: 'name', value: name});
@@ -182,9 +244,31 @@ var ChatbotCore = (function() {
     function fillAddressInput(address) {
         console.log('주소 추출:', address);
         
-        var addressInput = document.getElementById('address');
+        // 여러 가능한 ID 패턴 시도 (WebSquare 5.0.4 호환)
+        var addressIds = [
+            'form-address',
+            'form3-address',
+            'address',
+            'input_address',
+            'customer_address',
+            'userAddress'
+        ];
         
-        if (addressInput) addressInput.value = address;
+        var filled = false;
+        for (var i = 0; i < addressIds.length; i++) {
+            var addressInput = document.getElementById(addressIds[i]);
+            
+            if (addressInput) {
+                addressInput.value = address;
+                filled = true;
+                console.log('주소 입력 성공:', addressIds[i]);
+                break;
+            }
+        }
+        
+        if (!filled) {
+            console.warn('주소 입력 필드를 찾을 수 없습니다.');
+        }
         
         // 데이터 전송
         dispatchFormData({type: 'address', value: address});
